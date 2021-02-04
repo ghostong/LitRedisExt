@@ -1,0 +1,25 @@
+{
+  "name": "lit/redis-ext",
+  "description": "Redis的扩展使用",
+  "authors": [
+    {
+      "name": "litong",
+      "email": "ghostong@126.com"
+    }
+  ],
+  "keywords": [
+    "Redis",
+    "Counter"
+  ],
+  "require": {
+    "php": ">=5.6.0",
+    "ext-json": "*"
+  },
+  "minimum-stability": "stable",
+  "autoload": {
+    "files": [],
+    "psr-4": {
+      "Lit\\RedisExt\\": "src"
+    }
+  }
+}
