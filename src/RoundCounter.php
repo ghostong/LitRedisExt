@@ -2,6 +2,9 @@
 
 namespace Lit\RedisExt;
 
+/**
+ * 循环计数器
+ */
 class RoundCounter extends RedisExt
 {
     /**
@@ -77,7 +80,7 @@ class RoundCounter extends RedisExt
     }
 
     /**
-     * 自主设置过期的时间戳
+     * 自主设置过期时间戳的循环计数器
      * @date 2021/2/4
      * @param string $key redisKey
      * @param int $expire 循环截止日期, 时间戳

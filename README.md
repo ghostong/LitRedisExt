@@ -1,13 +1,15 @@
 # RedisExt
 通过redis实现一些常用功能
 
-
-## 循环计数器
+## 自行初始化Redis
 ````php
 //连接redis
 $redisHandler = new \Redis();
 $redisHandler->connect("192.168.1.163");
+````
 
+## 循环计数器
+````php
 //初始化计数器
 Lit\RedisExt\RoundCounter::init($redisHandler);
 
@@ -28,4 +30,22 @@ var_dump(Lit\RedisExt\RoundCounter::destroy("test3"));
 
 //获取一个定时器数值
 var_dump(Lit\RedisExt\RoundCounter::get("test4"));
+````
+
+## 固定集合
+````php
+//初始化固定集合
+Lit\RedisExt\CappedCollections::init($redisHandler);
+
+//固定集合写入数据
+var_dump(Lit\RedisExt\CappedCollections::set("abccc", uniqid(), 20));
+
+//获取固定集合中的数据量
+var_dump(Lit\RedisExt\CappedCollections::size("abccc"));
+
+//获取固定集合数据
+var_dump(Lit\RedisExt\CappedCollections::get("abccc", 15, 5));
+
+//销毁固定集合
+var_dump(Lit\RedisExt\CappedCollections::destroy("abccc"));
 ````
