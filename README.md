@@ -23,9 +23,9 @@ var_dump(Lit\RedisExt\RoundCounter::everyDays("test3", 3, false));
 //指定某时间过期
 var_dump(Lit\RedisExt\RoundCounter::nextRoundAt("test4", time() + 3600 * 7));
 
-//销毁一个定时器
+//销毁一个计数器
 var_dump(Lit\RedisExt\RoundCounter::destroy("test3"));
 
-//获取一个定时器数值
+//获取一个计数器数值
 var_dump(Lit\RedisExt\RoundCounter::get("test4"));
 ````
