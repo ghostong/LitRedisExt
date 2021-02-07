@@ -5,13 +5,13 @@ namespace Lit\RedisExt;
 /**
  * 循环计数器
  */
-class RoundCounter extends RedisExt
+class LoopCounter extends RedisExt
 {
     /**
-     * 初始化 RoundCounter
+     * 初始化 LoopCounter
      * @date 2021/2/4
      * @param mixed $redisHandler redis链接句柄
-     * @return RoundCounter
+     * @return LoopCounter
      * @author litong
      */
     public static function init($redisHandler) {
@@ -36,7 +36,7 @@ class RoundCounter extends RedisExt
         } else {
             $expire = $minutes * 60 + $time;
         }
-        return self::roundCounter($key, $expire);
+        return self::loopCounter($key, $expire);
     }
 
     /**
@@ -56,7 +56,7 @@ class RoundCounter extends RedisExt
         } else {
             $expire = $hours * 3600 + $time;
         }
-        return self::roundCounter($key, $expire);
+        return self::loopCounter($key, $expire);
     }
 
     /**
@@ -76,7 +76,7 @@ class RoundCounter extends RedisExt
         } else {
             $expire = $days * 86400 + $time;
         }
-        return self::roundCounter($key, $expire);
+        return self::loopCounter($key, $expire);
     }
 
     /**
@@ -89,7 +89,7 @@ class RoundCounter extends RedisExt
      * @author litong
      */
     public static function nextRoundAt($key, $expire) {
-        return self::roundCounter($key, $expire);
+        return self::loopCounter($key, $expire);
     }
 
     /**
@@ -126,7 +126,7 @@ class RoundCounter extends RedisExt
      * @throws \Exception
      * @author litong
      */
-    private static function roundCounter($key, $expire) {
+    private static function loopCounter($key, $expire) {
         $count = self::redisHandler()->incr($key);
         if ($count === 1 || $count === -1) {
             self::redisHandler()->expireAt($key, $expire);
