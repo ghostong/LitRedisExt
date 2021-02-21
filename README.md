@@ -2,6 +2,11 @@
 
 通过redis实现一些常用功能
 
+## 安装
+```
+composer require lit/redis-ext
+```
+
 ## 初始化Redis
 也可以使项目中已初始化好的redisHandler
 
@@ -40,8 +45,9 @@ Lit\RedisExt\LoopCounter::init($redisHandler);
  * 参数1 计数器redis key 可以根据使用维度自行设置
  * 参数2 计数器生命周期, 单位: 分钟
  * 参数3 是否完整分钟, true:完整的 x 分钟, false:从第一次计数开始 x 分钟)
+ * 参数4 每次增加数量
  * */
-if( Lit\RedisExt\LoopCounter::everyMinutes("test1", 1, false) > 5 ) {
+if( Lit\RedisExt\LoopCounter::everyMinutes("test1", 1, false, 1) > 5 ) {
     //超限流
 }else{
     //未超限流
@@ -56,15 +62,16 @@ if( Lit\RedisExt\LoopCounter::everyMinutes("test1", 1, false) > 5 ) {
  * 参数1 计数器redis key 可以根据使用维度自行设置
  * 参数2 计数器生命周期, 单位: 小时
  * 参数3 是否完整分钟, true:完整的 x 小时 false:从第一次计数开始 x 小时)
+ * 参数4 每次增加数量
  * */
-var_dump(Lit\RedisExt\LoopCounter::everyHours("test2", 2, true));
+var_dump(Lit\RedisExt\LoopCounter::everyHours("test2", 2, true, 1));
 ````
 
 #### 日期计时器
 
 ````php
 //日期计数器 从当前开始3天
-var_dump(Lit\RedisExt\LoopCounter::everyDays("test3", 3, false));
+var_dump(Lit\RedisExt\LoopCounter::everyDays("test3", 3, false, 1));
 ````
 
 #### 自定义计时器

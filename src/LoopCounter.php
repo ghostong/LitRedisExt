@@ -25,18 +25,19 @@ class LoopCounter extends RedisExt
      * @param string $key redisKey
      * @param int $minutes 循环周期, 分钟
      * @param bool $onTheMinute 是否完成的分钟 true 整点的, false 从当前开始
+     * @param int $number
      * @return int 当前计数器数值
      * @throws \Exception
      * @author litong
      */
-    public static function everyMinutes($key, $minutes, $onTheMinute = true) {
+    public static function everyMinutes($key, $minutes, $onTheMinute = true, $number = 1) {
         $time = time();
         if ($onTheMinute) {
             $expire = (floor($time / ($minutes * 60)) + 1) * $minutes * 60;
         } else {
             $expire = $minutes * 60 + $time;
         }
-        return self::loopCounter($key, $expire);
+        return self::loopCounter($key, $expire, $number);
     }
 
     /**
@@ -45,18 +46,19 @@ class LoopCounter extends RedisExt
      * @param string $key redisKey
      * @param int $hours 循环周期, 小时
      * @param bool $onTheHour 是否完成的小时 true 整点的, false 从当前开始
+     * @param int $number
      * @return int 当前计数器数值
      * @throws \Exception
      * @author litong
      */
-    public static function everyHours($key, $hours, $onTheHour = true) {
+    public static function everyHours($key, $hours, $onTheHour = true, $number = 1) {
         $time = time();
         if ($onTheHour) {
             $expire = (floor($time / ($hours * 3600)) + 1) * $hours * 3600;
         } else {
             $expire = $hours * 3600 + $time;
         }
-        return self::loopCounter($key, $expire);
+        return self::loopCounter($key, $expire, $number);
     }
 
     /**
@@ -65,18 +67,19 @@ class LoopCounter extends RedisExt
      * @param string $key redisKey
      * @param int $days 循环周期, 天
      * @param bool $allDay 是否完整的天 true 完整的, false 从当前开始
+     * @param int $number
      * @return int 当前计数器数值
      * @throws \Exception
      * @author litong
      */
-    public static function everyDays($key, $days, $allDay = true) {
+    public static function everyDays($key, $days, $allDay = true, $number = 1) {
         $time = time();
         if ($allDay) {
             $expire = (floor($time / ($days * 86400)) + 1) * $days * 86400;
         } else {
             $expire = $days * 86400 + $time;
         }
-        return self::loopCounter($key, $expire);
+        return self::loopCounter($key, $expire, $number);
     }
 
     /**
@@ -84,12 +87,13 @@ class LoopCounter extends RedisExt
      * @date 2021/2/4
      * @param string $key redisKey
      * @param int $expire 循环截止日期, 时间戳
+     * @param int $number
      * @return int 当前计数器数值
      * @throws \Exception
      * @author litong
      */
-    public static function nextRoundAt($key, $expire) {
-        return self::loopCounter($key, $expire);
+    public static function nextRoundAt($key, $expire, $number = 1) {
+        return self::loopCounter($key, $expire, $number);
     }
 
     /**
@@ -114,7 +118,7 @@ class LoopCounter extends RedisExt
      * @author litong
      */
     public static function destroy($key) {
-        return self::redisHandler()->delete($key) > 0;
+        return self::redisHandler()->del($key) > 0;
     }
 
     /**
@@ -122,13 +126,15 @@ class LoopCounter extends RedisExt
      * @date 2021/2/4
      * @param $key
      * @param $expire
+     * @param int $number
      * @return int
      * @throws \Exception
      * @author litong
      */
-    private static function loopCounter($key, $expire) {
-        $count = self::redisHandler()->incr($key);
-        if ($count === 1 || $count === -1) {
+    private static function loopCounter($key, $expire, $number = 1) {
+        $number = intval($number);
+        $count = self::redisHandler()->incrBy($key, $number);
+        if ($count === $number) {
             self::redisHandler()->expireAt($key, $expire);
         }
         return $count > 0 ? $count : 0;
