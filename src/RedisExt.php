@@ -11,6 +11,10 @@ class RedisExt
         self::$redisHandler = $redisHandler;
     }
 
+    /**
+     * @return \Redis
+     * @throws \Exception
+     */
     protected static function redisHandler() {
         if (self::$redisHandler !== null) {
             return self::$redisHandler;
