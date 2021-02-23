@@ -9,10 +9,10 @@ $redisHandler->connect("192.168.1.163");
 //初始化计数器
 Lit\RedisExt\LoopCounter::init($redisHandler);
 
-//分钟计时器 完整的1分钟
+//分钟计数器 完整的1分钟
 var_dump(Lit\RedisExt\LoopCounter::everyMinutes("test1", 1, true));
 
-//小时计时器 完整的2小时
+//小时计数器 完整的2小时
 var_dump(Lit\RedisExt\LoopCounter::everyHours("test2", 2, true));
 
 //日期计数器 从当前开始3天

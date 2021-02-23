@@ -76,6 +76,6 @@ class CappedCollections extends RedisExt
      * @author litong
      */
     public static function destroy($key) {
-        return self::redisHandler()->delete($key) > 0;
+        return self::redisHandler()->del($key) > 0;
     }
 }

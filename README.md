@@ -24,7 +24,7 @@ $redisHandler->connect("192.168.1.163");
 某些情况下, 我们需要知道周期内某些行为执行了多少次, 但是又不需要把它长久保存下来.
 例如: 
     1. 欢迎您: 2021年1月1日第 x 位访问者.
-    2. 周期内执行超过多少 次就 x.
+    2. 判断周期内执行过多少次,下一周期自动重置.
     3. 整点限流器.
 ```
 
@@ -37,7 +37,7 @@ $redisHandler->connect("192.168.1.163");
 Lit\RedisExt\LoopCounter::init($redisHandler);
 ````
 
-#### 分钟计时器
+#### 分钟计数器
 
 ````php
 /*
@@ -54,7 +54,7 @@ if( Lit\RedisExt\LoopCounter::everyMinutes("test1", 1, false, 1) > 5 ) {
 }
 ````
 
-#### 小时计时器
+#### 小时计数器
 
 ````php
 /*
@@ -67,14 +67,14 @@ if( Lit\RedisExt\LoopCounter::everyMinutes("test1", 1, false, 1) > 5 ) {
 var_dump(Lit\RedisExt\LoopCounter::everyHours("test2", 2, true, 1));
 ````
 
-#### 日期计时器
+#### 日期计数器
 
 ````php
 //日期计数器 从当前开始3天
 var_dump(Lit\RedisExt\LoopCounter::everyDays("test3", 3, false, 1));
 ````
 
-#### 自定义计时器
+#### 自定义计数器
 
 ````php
 //指定时间计数器 指定某时间过期
@@ -117,7 +117,7 @@ Lit\RedisExt\CappedCollections::init($redisHandler);
  * 参数2 要记录的数据
  * 参数3 固定集合限制条数
  * */
-var_dump(Lit\RedisExt\CappedCollections::set("abccc", uniqid(), 20));
+var_dump(Lit\RedisExt\CappedCollections::set("cappedKey", uniqid(), 20));
 ````
 
 #### 获取固定集合数据条数
@@ -125,7 +125,7 @@ var_dump(Lit\RedisExt\CappedCollections::set("abccc", uniqid(), 20));
 /*
  * 参数1 固定集合的key
  * */
-var_dump(Lit\RedisExt\CappedCollections::size("abccc"));
+var_dump(Lit\RedisExt\CappedCollections::size("cappedKey"));
 ````
 
 #### 获取固定集合数据
@@ -136,7 +136,7 @@ var_dump(Lit\RedisExt\CappedCollections::size("abccc"));
  * 参数2 偏移量
  * 参数3 获取数据条数限制
  * */
-var_dump(Lit\RedisExt\CappedCollections::get("abccc", 15, 5));
+var_dump(Lit\RedisExt\CappedCollections::get("cappedKey", 15, 5));
 ````
 
 #### 销毁固定集合
@@ -144,7 +144,7 @@ var_dump(Lit\RedisExt\CappedCollections::get("abccc", 15, 5));
 /*
  * 参数1 固定集合的key
  * */
-var_dump(Lit\RedisExt\CappedCollections::destroy("abccc"));
+var_dump(Lit\RedisExt\CappedCollections::destroy("cappedKey"));
 ````
 
 ## 循环限流器
@@ -152,8 +152,17 @@ var_dump(Lit\RedisExt\CappedCollections::destroy("abccc"));
 ### 场景说明
 
 ```
-当我们某个程序需要限流每分钟只能访问5次, 并且不希望没个限流周期结束后就重新计算所有限流.
-循环限流器可以保证, 第一次访问和下一次解除限制之间的时间是完整的一个周期.
+假设我们某个程序需要限流 '相对周期内' 只能访问5次.
+也就是说:
+    1) 第 1,2,3,4,5 次没有限制.
+    2) 第6次与第1次的间隔要大于等于1分种.
+    3) 第7次与第2次的间隔要大于等于1分种.
+    4) 如果周期内不访问, 过期的 3,4,5 将不会限制 8,9,10 的访问. 依次类推
+    循环限流器可以保证, 第一次访问和下一次解除限制之间的时间是完整的相对周期.
+举个例子:
+    运输公司的卡车数量不限, 但是只有5个集装箱, 每个集装箱的单次使用周期是1天, 到期后准时归还.
+    假设所有卡车都遵循此规则, 集装箱的流转过程就是循环限流器要实现的场景. 
+    卡车能拿到集装箱, 说明不限流, 拿不到说明限流. 我们要做的只是调整集装箱的数量.
 ```
 ### 示例
 
