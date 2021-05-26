@@ -21,7 +21,6 @@ class RedisExt
         } else {
             throw new \Exception("请使用 init 初始化!!", 1);
         }
-
     }
 
 }

@@ -2,6 +2,10 @@
 
 include(dirname(__DIR__) . "/vendor/autoload.php");
 
+/**
+ * 循环计数器
+ */
+
 //连接redis
 $redisHandler = new \Redis();
 $redisHandler->connect("192.168.1.163");

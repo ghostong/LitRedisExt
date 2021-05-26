@@ -3,11 +3,13 @@
 通过redis实现一些常用功能
 
 ## 安装
+
 ```
 composer require lit/redis-ext
 ```
 
 ## 初始化Redis
+
 也可以使项目中已初始化好的redisHandler
 
 ````php
@@ -94,6 +96,7 @@ var_dump(Lit\RedisExt\LoopCounter::get("test4"));
 ## 固定集合
 
 ### 场景说明
+
 ```
 某些情况下, 我们需要记录固定条数的数据
 例如: 
@@ -105,12 +108,14 @@ var_dump(Lit\RedisExt\LoopCounter::get("test4"));
 ### 示例
 
 #### 初始化
+
 ````php
 //初始化固定集合
 Lit\RedisExt\CappedCollections::init($redisHandler);
 ````
 
 #### 固定集合写入数据
+
 ````php
 /*
  * 参数1 固定集合的key
@@ -121,6 +126,7 @@ var_dump(Lit\RedisExt\CappedCollections::set("cappedKey", uniqid(), 20));
 ````
 
 #### 获取固定集合数据条数
+
 ````php
 /*
  * 参数1 固定集合的key
@@ -129,7 +135,9 @@ var_dump(Lit\RedisExt\CappedCollections::size("cappedKey"));
 ````
 
 #### 获取固定集合数据
+
 注意: 此方法在并发量大的时候,会造成翻页获取数据不准确.
+
 ````php
 /*
  * 参数1 固定集合的key
@@ -140,6 +148,7 @@ var_dump(Lit\RedisExt\CappedCollections::get("cappedKey", 15, 5));
 ````
 
 #### 销毁固定集合
+
 ````php
 /*
  * 参数1 固定集合的key
@@ -164,15 +173,18 @@ var_dump(Lit\RedisExt\CappedCollections::destroy("cappedKey"));
     假设所有卡车都遵循此规则, 集装箱的流转过程就是循环限流器要实现的场景. 
     卡车能拿到集装箱, 说明不限流, 拿不到说明限流. 我们要做的只是调整集装箱的数量.
 ```
+
 ### 示例
 
 #### 初始化
+
 ````php
 //初始化限流器
 Lit\RedisExt\LoopThrottle::init($redisHandler);
 ````
 
 #### 访问并增加访问次数
+
 ````php
 /*
  * 参数1 限流器key
@@ -182,7 +194,9 @@ Lit\RedisExt\LoopThrottle::init($redisHandler);
  * */
 var_dump(Lit\RedisExt\LoopThrottle::attempt("tKey1", 2, 10));
 ````
+
 #### 查询限流
+
 ````php
 /*
  * 参数1 限流器key
@@ -193,10 +207,61 @@ var_dump(Lit\RedisExt\LoopThrottle::count("tKey1", 300));
 ````
 
 #### 销毁限流器
+
 ````php
 
 /*
  * 参数1 限流器key
  * */
 var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
+````
+
+## 异步调用方法
+
+### 场景说明
+
+```
+接口要执行很长一段时间的逻辑, 由于很轻量化, 不想再使用消息队列.可以试一下异步调用方法.
+此方法需要启动一个定时任务或者守护进程.
+```
+
+### 示例
+
+#### 初始化链接
+
+````php
+\Lit\RedisExt\AsyncMethod::init($redisHandler);
+````
+
+#### 增加一个异步调用
+
+````php
+/**
+ * 参数1: 固定的RedisKey
+ * 参数2: 要执行的对象的命名空间
+ * 参数3: 要执行方法的类名
+ * 参数4: 要执行的方法名称
+ * 参数5: 调用的所有参数 (注意,此参数会在执行是增加一个 _uniqId 下标的唯一ID,供使用者对进程进行监控, 详见demo)
+ */
+\Lit\RedisExt\AsyncMethod::add("testKey", "\abc\\", "ABC", 'bbc', ["a" => 1, "b" => 3]);
+````
+
+#### 执行一条异步调用
+
+````php
+
+\Lit\RedisExt\AsyncMethod::run("testKey");
+````
+
+#### 执行所有异步调用
+
+````php
+
+\Lit\RedisExt\AsyncMethod::runAll("testKey");
+````
+
+#### 阻塞执行所有异步调用
+
+````php
+\Lit\RedisExt\AsyncMethod::runBlock("testKey");
 ````
