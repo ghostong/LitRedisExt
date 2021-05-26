@@ -249,19 +249,12 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
 #### 执行一条异步调用
 
 ````php
+/**
+ * 参数1: 固定的RedisKey
+ * 返回值: array 
+ *      callable: 函数调用信息
+ *      return: 异步方法返回值
+ */
 
 \Lit\RedisExt\AsyncMethod::run("testKey");
-````
-
-#### 执行所有异步调用
-
-````php
-
-\Lit\RedisExt\AsyncMethod::runAll("testKey");
-````
-
-#### 阻塞执行所有异步调用
-
-````php
-\Lit\RedisExt\AsyncMethod::runBlock("testKey");
 ````

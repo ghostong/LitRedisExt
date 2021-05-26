@@ -19,14 +19,7 @@ $redisHandler->connect("192.168.1.25");
 \Lit\RedisExt\AsyncMethod::add("testKey", "\abc\\", "ABC", 'bbc', ["a" => 1, "b" => 3]);
 
 //执行一条异步调用
-\Lit\RedisExt\AsyncMethod::run("testKey");
-
-//执行所有异步调用
-\Lit\RedisExt\AsyncMethod::runAll("testKey");
-
-//阻塞执行所有异步调用
-\Lit\RedisExt\AsyncMethod::runBlock("testKey");
-
+var_dump ( \Lit\RedisExt\AsyncMethod::run("testKey") );
 
 class ABC
 {

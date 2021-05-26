@@ -45,59 +45,25 @@ class AsyncMethod extends RedisExt
      * 执行异步回调 每次执行一条
      * @date 2021/5/25
      * @param string $redisKey 指定一个RedisKey
-     * @return mixed|false
+     * @return array
      * @throws \Exception
      * @author litong
      */
     public static function run($redisKey) {
         $serialize = self::redisHandler()->rpop($redisKey);
-        return self::call($serialize);
-    }
-
-    /**
-     * 异步执行所有回调 每次执行队列中所有
-     * @date 2021/5/26
-     * @param string $redisKey 指定一个RedisKey
-     * @return void
-     * @throws \Exception
-     * @author litong
-     */
-    public static function runAll($redisKey) {
-        while ($serialize = self::redisHandler()->rpop($redisKey)) {
-            self::call($serialize);
-        }
-    }
-
-    /**
-     * 阻塞模式监听, 执行所有回调
-     * @date 2021/5/26
-     * @param string $redisKey 指定一个RedisKey
-     * @return void
-     * @author litong
-     */
-    public static function runBlock($redisKey) {
-        while (true) {
-            $serialize = self::redisHandler()->brPop($redisKey, 10);
-            self::call($serialize[1]);
-        }
-    }
-
-    /**
-     * 执行调用
-     * @date 2021/5/26
-     * @param $serialize
-     * @return mixed|false
-     * @author litong
-     */
-    private static function call($serialize) {
         if (empty($serialize)) {
-            return false;
+            return [];
         }
         $data = unserialize($serialize);
         if (empty($data)) {
-            return false;
+            return [];
         }
-        return call_user_func_array([$data["namespace"] . $data["class"], $data["method"]], $data["param"]);
+        $return = call_user_func_array([$data["namespace"] . $data["class"], $data["method"]], $data["param"]);
+        return [
+            "return" => $return,
+            "callable" => $data
+        ];
     }
+
 
 }
