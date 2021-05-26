@@ -12,7 +12,7 @@ class AsyncMethod extends RedisExt
 {
 
     /**
-     * 初始化异步回调
+     * 初始化异步方法
      * @date 2021/5/25
      * @param mixed $redisHandler redis链接句柄
      * @return AsyncMethod
@@ -24,7 +24,7 @@ class AsyncMethod extends RedisExt
     }
 
     /**
-     * 增加一条异步回调
+     * 增加一条异步方法调用
      * @date 2021/5/25
      * @param string $redisKey 指定一个RedisKey
      * @param string $namespace 要执行的对象的命名空间
@@ -42,7 +42,7 @@ class AsyncMethod extends RedisExt
     }
 
     /**
-     * 执行异步回调 每次执行一条
+     * 执行异步方法调用 每次执行一条
      * @date 2021/5/25
      * @param string $redisKey 指定一个RedisKey
      * @return array
@@ -58,7 +58,7 @@ class AsyncMethod extends RedisExt
         if (empty($data)) {
             return [];
         }
-        $return = call_user_func_array([$data["namespace"] . $data["class"], $data["method"]], $data["param"]);
+        $return = @call_user_func_array([$data["namespace"] . $data["class"], $data["method"]], $data["param"]);
         return [
             "return" => $return,
             "callable" => $data
