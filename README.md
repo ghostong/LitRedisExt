@@ -238,12 +238,12 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
 ````php
 /**
  * 参数1: 固定的RedisKey
- * 参数2: 要执行的对象的命名空间
- * 参数3: 要执行方法的类名
- * 参数4: 要执行的方法名称
- * 参数5: 调用的所有参数 (注意,此参数会在执行是增加一个 _uniqId 下标的唯一ID,供使用者对进程进行监控, 详见demo)
+ * 参数2: 被实例化的对象
+ * 参数3: 要执行的方法名称
+ * 参数4: 调用的所有参数 (注意,此参数会在执行是增加一个 _uniqId 下标的唯一ID,供使用者对进程进行监控, 详见demo)
  */
-\Lit\RedisExt\AsyncMethod::add("testKey", "\abc\\", "ABC", 'bbc', ["a" => 1, "b" => 3]);
+\Lit\RedisExt\AsyncMethod::add("testKey", new \Demo\DemoClass(), 'staticClass', ["a" => 1, "b" => 3]);
+
 ````
 
 #### 执行一条异步调用
