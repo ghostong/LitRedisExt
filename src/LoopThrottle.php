@@ -22,7 +22,7 @@ class LoopThrottle extends RedisExt
     }
 
     /**
-     *
+     * 尝试获取限流访问
      * @date 2021/2/7
      * @param string $key
      * @param int $limit
