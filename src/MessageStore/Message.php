@@ -3,90 +3,173 @@
 namespace Lit\RedisExt\MessageStore;
 
 
-use Lit\RedisExt\Mapper\GroupMessageMapper;
-use Lit\RedisExt\Mapper\MessageMapper;
-use Lit\RedisExt\Mapper\SenderMapper;
-use Lit\RedisExt\Mapper\SingleMessageMapper;
+use Lit\RedisExt\MessageStore\Mapper\SenderDingMapper;
+use Lit\RedisExt\MessageStore\Mapper\MessageGroupMapper;
+use Lit\RedisExt\MessageStore\Mapper\MessageMapper;
+use Lit\RedisExt\MessageStore\Mapper\SenderMapper;
+use Lit\RedisExt\MessageStore\Mapper\MessageSingleMapper;
+use Lit\RedisExt\MessageStore\Sender\Ding;
 
 
-class Message
+class Message extends ErrorMsg
 {
     /** @var \Redis $redisHandler */
     protected $redisHandler = null;
+    protected $message = null;
+    protected $sender = null;
 
-    protected $errorCode = 0;
-    protected $errorMessage = "";
-
+    /**
+     * message队列redisKey
+     */
     public $messageListKey = "message:store:zset:message:list";
+
+    /**
+     * 分组消息数据存储key前缀
+     */
     public $groupDataKey = "message:store:hset:group:data";
+
+    /**
+     * 独立消息存储key
+     */
     public $singleDataKey = "message:store:hset:single:data";
+
+    /**
+     * 消息排重redis key 前缀
+     */
     public $duplicateKey = "message:store:string:duplicate";
+
 
     public function __construct($redisHandler) {
         $this->redisHandler = $redisHandler;
     }
 
+    /**
+     * 增加发送参数
+     * @date 2022/3/31
+     * @param SenderMapper $sender
+     * @return Message
+     * @author litong
+     */
+    public function setSender(SenderMapper $sender) {
+        $this->sender = $this->senderFormat($sender);
+        return $this;
+    }
+
+    /**
+     * 分组消息数据存储redis key
+     * @date 2022/3/31
+     * @param $topic
+     * @return string
+     * @author litong
+     */
     protected function groupDataKey($topic) {
         return $this->groupDataKey . ":" . $topic;
     }
 
+    /**
+     * 通过message对象获取message 唯一消息ID
+     * @date 2022/3/31
+     * @param MessageMapper $message
+     * @return string
+     * @author litong
+     */
     protected function getMessageId(MessageMapper $message) {
-        return $message->messageType . "_" . $message->topic . "_" . $message->uniqId;
+        $messageType = constant(get_class($message) . "::MESSAGE_TYPE");
+        return $messageType . "_" . $message->topic . "_" . $message->uniqId;
     }
 
+    /**
+     * 通过message对象获取队列唯一指针值
+     * @date 2022/3/31
+     * @param MessageMapper $message
+     * @return string
+     * @author litong
+     */
     protected function getMessagePointer(MessageMapper $message) {
-        if ($message->messageType === SingleMessage::MESSAGE_TYPE) {
+        $messageType = constant(get_class($message) . "::MESSAGE_TYPE");
+        if ($messageType === MessageSingleMapper::MESSAGE_TYPE) {
             return $this->getMessageId($message);
         } else {
-            return $message->messageType . "_" . $message->topic;
+            return $messageType . "_" . $message->topic;
         }
     }
 
-    protected function messageIdDecode($messageId) {
-        $return = [];
-        list($return["type"], $return["topic"], $return["uniqId"]) = explode("_", $messageId);
-        return $return;
-    }
-
+    /**
+     * 消息指针值 转换 消息类型, 消息topic
+     * @date 2022/3/31
+     * @param $pointer
+     * @return array
+     * @author litong
+     */
     protected function pointerDecode($pointer) {
-        $return = [];
         list($return["type"], $return["topic"]) = explode("_", $pointer);
         return $return;
     }
 
+    /**
+     * 消息指针值 转 消息类型
+     * @date 2022/3/31
+     * @param $pointer
+     * @return string
+     * @author litong
+     */
     protected function pointerToType($pointer) {
         $pointerData = $this->pointerDecode($pointer);
-        if (in_array($pointerData["type"], [SingleMessage::MESSAGE_TYPE, GroupMessage::MESSAGE_TYPE])) {
+        if (in_array($pointerData["type"], [MessageSingleMapper::MESSAGE_TYPE, MessageGroupMapper::MESSAGE_TYPE])) {
             return $pointerData["type"];
         } else {
-            return SingleMessage::MESSAGE_TYPE;
+            return MessageSingleMapper::MESSAGE_TYPE;
         }
     }
 
+    /**
+     * 格式化 消息体
+     * @date 2022/3/31
+     * @param MessageMapper $message
+     * @return MessageMapper
+     * @author litong
+     */
+    protected function messageFormat(MessageMapper $message) {
+        $message->uniqId = is_null($message->uniqId) ? uniqid() : $message->uniqId;
+        $message->topic = is_null($message->topic) ? "public" : $message->topic;
+        $message->duplicateSecond = (is_numeric($message->duplicateSecond) && $message->duplicateSecond > 0) ? intval($message->duplicateSecond) : null;
+        return $message;
+    }
+
+    /**
+     * 格式化 发送体
+     * @date 2022/3/31
+     * @param SenderMapper $sender
+     * @return SenderMapper
+     * @author litong
+     */
+    protected function senderFormat(SenderMapper $sender) {
+        return $sender;
+    }
+
+    /**
+     * 消息保存至队列
+     * @date 2022/3/31
+     * @param MessageMapper $message
+     * @return bool
+     * @author litong
+     */
     protected function messageToList(MessageMapper $message) {
         $this->redisHandler->zAdd($this->messageListKey, strtotime($message->sendTime), $this->getMessagePointer($message));
         return true;
     }
 
-    protected function messageFormat(MessageMapper $message, $messageType) {
-        $message->uniqId = is_null($message->uniqId) ? uniqid() : $message->uniqId;
-        $message->topic = is_null($message->topic) ? "public" : $message->topic;
-        $message->duplicateSecond = (is_numeric($message->duplicateSecond) && $message->duplicateSecond > 0) ? intval($message->duplicateSecond) : null;
-        $message->messageType = $messageType;
-        return $message;
-    }
-
-    protected function senderFormat(SenderMapper $sender) {
-        return $sender;
-    }
-
-    protected function saveMessageBody(MessageMapper $message) {
-        if ($message->messageType === SingleMessage::MESSAGE_TYPE) {
-            $key = $this->singleDataKey;
-        } else {
-            $key = $this->groupDataKey($message->topic);
-        }
-        if ($this->redisHandler->hSet($key, $this->getMessageId($message), $message->body) !== false) {
+    /**
+     * 消息体保存至存储
+     * @date 2022/3/31
+     * @param MessageSingleMapper|MessageGroupMapper $message
+     * @param SenderMapper|null $sender
+     * @return bool
+     * @author litong
+     */
+    protected function saveMessageBody($redisKey, $message, SenderMapper $sender = null) {
+        $data = json_encode(["message" => $message, "sender" => $sender, "sender_class" => get_class($sender)]);
+        if ($this->redisHandler->hSet($redisKey, $this->getMessageId($message), $data) !== false) {
             return true;
         } else {
             $this->setError(10101, __CLASS__ . " error");
@@ -94,54 +177,76 @@ class Message
         }
     }
 
+    /**
+     * 消费消息数据
+     * @date 2022/3/31
+     * @return array
+     * @author litong
+     */
     protected function popData() {
         $time = time();
-        $data = $this->redisHandler->zRangeByScore($this->messageListKey, 0, $time, ['withscores' => TRUE]);
+        $data = $this->redisHandler->zRangeByScore($this->messageListKey, 0, $time);
         $this->redisHandler->zRemRangeByScore($this->messageListKey, 0, $time);
-        $return = [
-            SingleMessage::MESSAGE_TYPE => [],
-            GroupMessage::MESSAGE_TYPE => []
-        ];
-        foreach ($data as $pointer => $timestamp) {
+        $return = [MessageSingleMapper::MESSAGE_TYPE => [], MessageGroupMapper::MESSAGE_TYPE => []];
+        foreach ($data as $pointer) {
             $type = $this->pointerToType($pointer);
-            if ($type === SingleMessage::MESSAGE_TYPE) {
-                $return[SingleMessage::MESSAGE_TYPE][] = $this->popSingleData($pointer, $timestamp);
+            if ($type === MessageSingleMapper::MESSAGE_TYPE) {
+                $return[MessageSingleMapper::MESSAGE_TYPE][] = $this->popSingleData($pointer);
             } else {
-                $return[GroupMessage::MESSAGE_TYPE][] = $this->popGroupData($pointer, $timestamp);
+                $return[MessageGroupMapper::MESSAGE_TYPE][] = $this->popGroupData($pointer);
             }
         }
         return $return;
     }
 
-    protected function popGroupData($pointer, $timestamp) {
+    /**
+     * 消费群组消息
+     * @date 2022/3/31
+     * @param $pointer
+     * @return array
+     * @author litong
+     */
+    protected function popGroupData($pointer) {
         $info = $this->pointerDecode($pointer);
         $bodies = $this->redisHandler->hGetAll($this->groupDataKey($info['topic']));
         $this->redisHandler->del($this->groupDataKey($info['topic']));
-        $return = [];
-        foreach ($bodies as $messageId => $body) {
-            $messageInfo = $this->messageIdDecode($messageId);
-            $groupMapper = new GroupMessageMapper();
-            $groupMapper->body = $body;
-            $groupMapper->topic = $info["topic"];
-            $groupMapper->uniqId = $messageInfo["uniqId"];
-            $groupMapper->sendTime = date("Y-m-d H:i:s", $timestamp);
-            $return[] = $groupMapper;
+        $groupMappers = $senderMappers = [];
+        foreach ($bodies as $body) {
+            $data = json_decode($body, true);
+            $groupMapper = new MessageGroupMapper($data["message"]);
+            $groupMappers[] = $groupMapper;
+            $senderMappers[] = $this->dataToSenderMapper($data["sender_class"], $data["sender"]);
         }
-        return $return;
+        return [$groupMappers, $senderMappers];
     }
 
-    protected function popSingleData($messageId, $timestamp) {
-        $info = $this->messageIdDecode($messageId);
+    /**
+     * 消费独立消息
+     * @date 2022/3/31
+     * @param $messageId
+     * @return array
+     * @author litong
+     */
+    protected function popSingleData($messageId) {
         $body = $this->redisHandler->hGet($this->singleDataKey, $messageId);
         $this->redisHandler->hDel($this->singleDataKey, $messageId);
-        $singleMapper = new SingleMessageMapper();
-        $singleMapper->body = $body;
-        $singleMapper->topic = $info["topic"];
-        $singleMapper->uniqId = $info["uniqId"];
-        $singleMapper->sendTime = date("Y-m-d H:i:s", $timestamp);
-        return $singleMapper;
+        $data = json_decode($body, true);
+        $singleMapper = new MessageSingleMapper($data["message"]);
+        $senderMapper = $this->dataToSenderMapper($data["sender_class"], $data["sender"]);
+        return [$singleMapper, $senderMapper];
     }
 
+    protected function dataToSenderMapper($senderClass, $sender = null) {
+        return new $senderClass($sender);
+    }
+
+    /**
+     * 重复消息校验
+     * @date 2022/3/31
+     * @param MessageMapper $message
+     * @return bool
+     * @author litong
+     */
     protected function duplicateChecked(MessageMapper $message) {
         if (is_null($message->duplicateSecond)) {
             return true;
@@ -158,16 +263,4 @@ class Message
         }
     }
 
-    protected function setError($errorCode, $errorMessage) {
-        $this->errorCode = $errorCode;
-        $this->errorMessage = $errorMessage;
-    }
-
-    public function getErrorCode() {
-        return $this->errorCode;
-    }
-
-    public function getErrorMessage() {
-        return $this->errorMessage;
-    }
 }

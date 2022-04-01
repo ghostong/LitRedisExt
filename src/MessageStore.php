@@ -2,11 +2,14 @@
 
 namespace Lit\RedisExt;
 
-use Lit\RedisExt\Mapper\SingleMessageMapper;
-use Lit\RedisExt\MessageStore\GroupMessage;
-use Lit\RedisExt\MessageStore\Message;
-use Lit\RedisExt\MessageStore\SendMessage;
-use Lit\RedisExt\MessageStore\SingleMessage;
+
+use Lit\RedisExt\MessageStore\MessageGroup;
+use Lit\RedisExt\MessageStore\Mapper\MessageMapper;
+use Lit\RedisExt\MessageStore\Mapper\SenderMapper;
+
+use Lit\RedisExt\MessageStore\Sender;
+use Lit\RedisExt\MessageStore\MessageSend;
+use Lit\RedisExt\MessageStore\MessageSingle;
 
 class MessageStore extends RedisExt
 {
@@ -26,23 +29,23 @@ class MessageStore extends RedisExt
     /**
      * 独立消息
      * @date 2022/3/29
-     * @return SingleMessage
+     * @return MessageSingle
      * @throws \Exception
      * @author litong
      */
     public static function single() {
-        return new SingleMessage(self::redisHandler());
+        return new MessageSingle(self::redisHandler());
     }
 
     /**
      * 分组消息
      * @date 2022/3/29
-     * @return GroupMessage
+     * @return MessageGroup
      * @throws \Exception
      * @author litong
      */
     public static function group() {
-        return new GroupMessage(self::redisHandler());
+        return new MessageGroup(self::redisHandler());
     }
 
     /**
@@ -55,8 +58,24 @@ class MessageStore extends RedisExt
      * @author litong
      */
     public static function run(callable $singleCallback, callable $groupCallback) {
-        (new SendMessage(self::redisHandler()))->run($singleCallback, $groupCallback);
+        (new MessageSend(self::redisHandler()))->run($singleCallback, $groupCallback);
     }
 
+    /**
+     * 自动执行
+     * @date 2022/4/1
+     * @throws \Exception
+     * @author litong
+     */
+    public static function autoRun() {
+        (new MessageSend(self::redisHandler()))->run(
+            function (MessageMapper $message, SenderMapper $sender = null) {
+                Sender::SendSingle($message, $sender);
+            },
+            function (array $message, array $sender = null) {
+                Sender::DingSendGroup($message, $sender);
+            }
+        );
+    }
 
 }

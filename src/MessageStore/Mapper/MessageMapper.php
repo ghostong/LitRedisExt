@@ -1,8 +1,8 @@
 <?php
 
-namespace Lit\RedisExt\Mapper;
+namespace Lit\RedisExt\MessageStore\Mapper;
 
-class MessageMapper
+class MessageMapper extends BaseMapper
 {
 
     /**
@@ -10,6 +10,12 @@ class MessageMapper
      * @example 字符串
      */
     public $topic = null;
+
+    /**
+     * 消息标题, 字符串消息
+     * @example 字符串
+     */
+    public $title = null;
 
     /**
      * 消息体, 字符串消息
@@ -28,12 +34,6 @@ class MessageMapper
      * @example uniqid()
      */
     public $uniqId = null;
-
-    /**
-     * 消息类型 修改无效
-     * @example s|g
-     */
-    public $messageType = null;
 
     /**
      * 同一个消息的冷却时间 (单位: 秒), 计时时间内消息重复不会被发送
