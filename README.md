@@ -258,3 +258,7 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
 
 \Lit\RedisExt\AsyncMethod::run("testKey");
 ````
+
+## 信息整合器
+
+见 示例

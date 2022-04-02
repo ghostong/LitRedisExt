@@ -9,7 +9,7 @@ use Lit\RedisExt\MessageStore\Mapper\SenderDingTextMapper;
 class DingSingle extends Ding
 {
     public static function text(MessageSingleMapper $message, SenderDingMapper $sender) {
-        $data["msgtype"] = constant(get_class($sender) . "::MSG_TYPE");
+        $data["msgtype"] = __FUNCTION__;
         $data["text"]["content"] = $message->body;
         if (property_exists($sender, "atMobiles")) {
             $data["at"]["atMobiles"] = $sender->atMobiles;
@@ -24,7 +24,7 @@ class DingSingle extends Ding
     }
 
     public static function markdown(MessageSingleMapper $message, SenderDingMapper $sender) {
-        $data["msgtype"] = constant(get_class($sender) . "::MSG_TYPE");
+        $data["msgtype"] = __FUNCTION__;
         $data["markdown"]["title"] = $message->title;
         $data["markdown"]["text"] = $message->body;
         if (property_exists($sender, "atMobiles")) {
@@ -40,7 +40,7 @@ class DingSingle extends Ding
     }
 
     public static function link(MessageSingleMapper $message, SenderDingMapper $sender) {
-        $data["msgtype"] = constant(get_class($sender) . "::MSG_TYPE");
+        $data["msgtype"] = __FUNCTION__;
         $data["link"]["text"] = $message->body;
         $data["link"]["title"] = $message->title;
         if (property_exists($sender, "picUrl")) {
@@ -53,20 +53,11 @@ class DingSingle extends Ding
     }
 
     public static function feedCard(MessageSingleMapper $message, SenderDingMapper $sender) {
-        $data["msgtype"] = SenderDingTextMapper::MSG_TYPE;
+        $data["msgtype"] = "text";
         $data["text"]["content"] = $message->body;
-        if (property_exists($sender, "atMobiles")) {
-            $data["at"]["atMobiles"] = $sender->atMobiles;
-        }
-        if (property_exists($sender, "atUserIds")) {
-            $data["at"]["atUserIds"] = $sender->atUserIds;
-        }
-        if (property_exists($sender, "isAtAll")) {
-            $data["at"]["isAtAll"] = $sender->isAtAll;
-        }
         self::request($data, $sender->accessToken, $sender->token);
 
-        $data["msgtype"] = constant(get_class($sender) . "::MSG_TYPE");
+        $data["msgtype"] = __FUNCTION__;
         if (property_exists($sender, "links")) {
             $data["feedCard"]["links"] = $sender->links;
         }
@@ -74,7 +65,7 @@ class DingSingle extends Ding
     }
 
     public static function actionCard(MessageSingleMapper $message, SenderDingMapper $sender) {
-        $data["msgtype"] = constant(get_class($sender) . "::MSG_TYPE");
+        $data["msgtype"] = __FUNCTION__;
         $data["actionCard"]["title"] = $message->title;
         $data["actionCard"]["text"] = $message->body;
 
