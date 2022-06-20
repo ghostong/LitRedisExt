@@ -155,7 +155,7 @@ class Message extends ErrorMsg
      * @author litong
      */
     protected function messageToList(MessageMapper $message) {
-        $this->redisHandler->zAdd($this->messageListKey, strtotime($message->sendTime), $this->getMessagePointer($message));
+        $this->redisHandler->zAdd($this->messageListKey, $message->sendTime ? strtotime($message->sendTime) : time(), $this->getMessagePointer($message));
         return true;
     }
 
