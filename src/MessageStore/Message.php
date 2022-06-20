@@ -209,6 +209,7 @@ class Message extends ErrorMsg
     protected function popGroupData($pointer) {
         $info = $this->pointerDecode($pointer);
         $bodies = $this->redisHandler->hGetAll($this->groupDataKey($info['topic']));
+        ksort($bodies);
         $this->redisHandler->del($this->groupDataKey($info['topic']));
         $groupMappers = $senderMappers = [];
         foreach ($bodies as $body) {
