@@ -6,19 +6,19 @@ class MessageMapper extends BaseMapper
 {
 
     /**
-     * 消息类型
+     * 消息类型  不能包含下划线(_)
      * @example 字符串
      */
     public $topic = null;
 
     /**
-     * 消息标题, 字符串消息
+     * 消息标题  字符串消息
      * @example 字符串
      */
     public $title = null;
 
     /**
-     * 消息体, 字符串消息
+     * 消息体  字符串消息
      * @example 字符串
      */
     public $body = null;
