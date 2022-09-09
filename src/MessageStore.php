@@ -11,6 +11,9 @@ use Lit\RedisExt\MessageStore\Sender;
 use Lit\RedisExt\MessageStore\MessageSend;
 use Lit\RedisExt\MessageStore\MessageSingle;
 
+/**
+ * 消息库
+ */
 class MessageStore extends RedisExt
 {
     /**

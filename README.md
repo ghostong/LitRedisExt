@@ -42,7 +42,7 @@ Lit\RedisExt\LoopCounter::init($redisHandler);
 #### 分钟计数器
 
 ````php
-/*
+/**
  * 分钟计数器: 实现每分钟5次限流器
  * 参数1 计数器redis key 可以根据使用维度自行设置
  * 参数2 计数器生命周期, 单位: 分钟
@@ -59,7 +59,7 @@ if( Lit\RedisExt\LoopCounter::everyMinutes("test1", 1, false, 1) > 5 ) {
 #### 小时计数器
 
 ````php
-/*
+/**
  * 小时计数器: 实现记录2小时之内第几次访问
  * 参数1 计数器redis key 可以根据使用维度自行设置
  * 参数2 计数器生命周期, 单位: 小时
@@ -95,6 +95,12 @@ var_dump(Lit\RedisExt\LoopCounter::get("test4"));
 
 ## 固定集合
 
+### 特别提示
+
+```
+此类使用 lua 脚本, 可能存在不兼容
+```
+
 ### 场景说明
 
 ```
@@ -117,7 +123,7 @@ Lit\RedisExt\CappedCollections::init($redisHandler);
 #### 固定集合写入数据
 
 ````php
-/*
+/**
  * 参数1 固定集合的key
  * 参数2 要记录的数据
  * 参数3 固定集合限制条数
@@ -128,7 +134,7 @@ var_dump(Lit\RedisExt\CappedCollections::set("cappedKey", uniqid(), 20));
 #### 获取固定集合数据条数
 
 ````php
-/*
+/**
  * 参数1 固定集合的key
  * */
 var_dump(Lit\RedisExt\CappedCollections::size("cappedKey"));
@@ -139,7 +145,7 @@ var_dump(Lit\RedisExt\CappedCollections::size("cappedKey"));
 注意: 此方法在并发量大的时候,会造成翻页获取数据不准确.
 
 ````php
-/*
+/**
  * 参数1 固定集合的key
  * 参数2 偏移量
  * 参数3 获取数据条数限制
@@ -150,13 +156,19 @@ var_dump(Lit\RedisExt\CappedCollections::get("cappedKey", 15, 5));
 #### 销毁固定集合
 
 ````php
-/*
+/**
  * 参数1 固定集合的key
  * */
 var_dump(Lit\RedisExt\CappedCollections::destroy("cappedKey"));
 ````
 
 ## 循环限流器
+
+### 特别提示
+
+```
+此类使用 lua 脚本, 可能存在不兼容
+```
 
 ### 场景说明
 
@@ -186,7 +198,7 @@ Lit\RedisExt\LoopThrottle::init($redisHandler);
 #### 访问并增加访问次数
 
 ````php
-/*
+/**
  * 参数1 限流器key
  * 参数2 限流次数
  * 参数2 限流周期
@@ -198,7 +210,7 @@ var_dump(Lit\RedisExt\LoopThrottle::attempt("tKey1", 2, 10));
 #### 查询限流
 
 ````php
-/*
+/**
  * 参数1 限流器key
  * 参数2 限流周期
  * 返回 周期内有效访问次数
@@ -210,7 +222,7 @@ var_dump(Lit\RedisExt\LoopThrottle::count("tKey1", 300));
 
 ````php
 
-/*
+/**
  * 参数1 限流器key
  * */
 var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
@@ -257,6 +269,48 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
  */
 
 \Lit\RedisExt\AsyncMethod::run("testKey");
+````
+
+## 独占锁
+
+### 示例
+
+#### 初始化链接
+
+````php
+\Lit\RedisExt\XLocks::init($redisHandler);
+````
+
+#### 获取锁
+
+````php
+/**
+ * 参数1: 锁的RedisKey
+ * 参数2: 自动解锁时间(秒). 0为不自动解锁
+ * 参数3: 使用完成后自动解锁(忽略自动解锁时间)
+ * 返回值: bool true拿到锁, false未拿到锁
+ */
+var_dump(\Lit\RedisExt\XLocks::lock("testa", 20, true));
+````
+
+#### 解锁
+
+````php
+/**
+ * 参数1: 锁的RedisKey
+ * 返回值: bool true已解锁, false解锁失败或未上锁
+ */
+var_dump(\Lit\RedisExt\XLocks::unLock("testa"));
+````
+
+#### 获取锁生命周期
+
+````php
+/**
+ * 参数1: 锁的RedisKey
+ * 返回值: int 锁的生命周期
+ */
+var_dump(\Lit\RedisExt\XLocks::ttl("testa"));
 ````
 
 ## 信息整合器
