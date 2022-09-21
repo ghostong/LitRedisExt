@@ -13,15 +13,20 @@ $redisHandler = new \Redis();
 $redisHandler->connect("192.168.1.25");
 
 //初始化链接
-\Lit\RedisExt\AsyncMethod::init($redisHandler);
-
-function DemoFunction($a, $b, $_uniqId) {
-    var_dump(__FUNCTION__, $a, $b, $_uniqId);
-}
+\Lit\RedisExt\AsyncMethod::init($redisHandler, 5);
 
 //增加一个异步调用
-\Lit\RedisExt\AsyncMethod::add("testKey", new \Demo\DemoClass(), 'staticClass', ["a" => 1, "b" => 3]);
-\Lit\RedisExt\AsyncMethod::add("testKey", new \Demo\DemoClass(), 'className', ["a" => 1, "b" => 3]);
+$uniqId = \Lit\RedisExt\AsyncMethod::add("testKey", new \Demo\DemoClass(), 'staticClass', ["a" => 1, "b" => 3]);
+
+//运行一个任务
+\Lit\RedisExt\AsyncMethod::run("testKey");
+
+//获取一个任务的运行状态
+var_dump(\Lit\RedisExt\AsyncMethod::getStatus($uniqId));
+
+//获取任务列表
+var_dump(\Lit\RedisExt\AsyncMethod::getList("testKey"));
+
 
 //执行异步调用
 while (\Lit\RedisExt\AsyncMethod::run("testKey")) {

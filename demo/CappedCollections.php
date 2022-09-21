@@ -8,7 +8,7 @@ include(dirname(__DIR__) . "/vendor/autoload.php");
 
 //连接redis
 $redisHandler = new \Redis();
-$redisHandler->connect("192.168.1.163");
+$redisHandler->connect("192.168.1.25");
 
 //初始化固定集合
 Lit\RedisExt\CappedCollections::init($redisHandler);
@@ -20,7 +20,7 @@ var_dump(Lit\RedisExt\CappedCollections::set("cappedKey", uniqid(), 20));
 var_dump(Lit\RedisExt\CappedCollections::size("cappedKey"));
 
 //获取固定集合数据
-var_dump(Lit\RedisExt\CappedCollections::get("cappedKey", 15, 5));
+var_dump(Lit\RedisExt\CappedCollections::get("cappedKey", 0, 5));
 
 //销毁固定集合
 var_dump(Lit\RedisExt\CappedCollections::destroy("cappedKey"));

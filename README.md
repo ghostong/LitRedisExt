@@ -242,7 +242,11 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
 #### 初始化链接
 
 ````php
-\Lit\RedisExt\AsyncMethod::init($redisHandler);
+/**
+ * 参数1: $redisHandler redis链接句柄
+ * 参数2: int $collectionsLength 内置固定集合长度, 用于保存执行历史
+ */
+\Lit\RedisExt\AsyncMethod::init($redisHandler, 50);
 ````
 
 #### 增加一个异步调用
@@ -253,6 +257,7 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
  * 参数2: 被实例化的对象
  * 参数3: 要执行的方法名称
  * 参数4: 调用的所有参数 (注意,此参数会在执行是增加一个 _uniqId 下标的唯一ID,供使用者对进程进行监控, 详见demo)
+ * 返回值: string 唯一的进程ID _uniqId
  */
 \Lit\RedisExt\AsyncMethod::add("testKey", new \Demo\DemoClass(), 'staticClass', ["a" => 1, "b" => 3]);
 
@@ -267,8 +272,39 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
  *      callable: 函数调用信息
  *      return: 异步方法返回值
  */
-
 \Lit\RedisExt\AsyncMethod::run("testKey");
+````
+
+#### 获取一个任务的运行状态
+
+````php
+/**
+ * 参数1: add 方法返回的唯一进程ID
+ * 返回值: int|false 
+ *     int 进程状态码
+ *     false 未找到记录
+ * 附进程状态码:
+ *    -1 失败
+ *     0 等待中
+ *     1 运行中
+ *     2 成功 
+ */
+var_dump(\Lit\RedisExt\AsyncMethod::getStatus("t-632ad7f381214"));
+````
+
+#### 获取任务列表
+
+````php
+/**
+ * 参数1: 指定一个RedisKey, 同 add 方法一致
+ * 参数2: 列表分页 索引
+ * 参数3: 列表分页 显示条数
+ * 返回值: array 列表数据
+ *    data: 数据
+ *    nextIndex: 下一页索引开始
+ *    count: 总条数
+ */
+var_dump(\Lit\RedisExt\AsyncMethod::getList("testKey",0 , 10));
 ````
 
 ## 独占锁
