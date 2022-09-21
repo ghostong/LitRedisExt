@@ -95,12 +95,6 @@ var_dump(Lit\RedisExt\LoopCounter::get("test4"));
 
 ## 固定集合
 
-### 特别提示
-
-```
-此类使用 lua 脚本, 可能存在不兼容
-```
-
 ### 场景说明
 
 ```
