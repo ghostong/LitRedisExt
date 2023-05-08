@@ -4,7 +4,7 @@
 namespace Lit\RedisExt\Structs;
 
 
-class CacheStringKey
+class CacheSupGetKey
 {
     //redis key
     protected $key = "";

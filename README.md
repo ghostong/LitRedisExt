@@ -39,7 +39,7 @@ $redisHandler->connect("192.168.1.163");
 Lit\RedisExt\LoopCounter::init($redisHandler);
 ````
 
-#### 分钟计数器
+#### 1. 分钟计数器
 
 ````php
 /**
@@ -56,7 +56,7 @@ if( Lit\RedisExt\LoopCounter::everyMinutes("test1", 1, false, 1) > 5 ) {
 }
 ````
 
-#### 小时计数器
+#### 2. 小时计数器
 
 ````php
 /**
@@ -69,21 +69,21 @@ if( Lit\RedisExt\LoopCounter::everyMinutes("test1", 1, false, 1) > 5 ) {
 var_dump(Lit\RedisExt\LoopCounter::everyHours("test2", 2, true, 1));
 ````
 
-#### 日期计数器
+#### 3. 日期计数器
 
 ````php
 //日期计数器 从当前开始3天
 var_dump(Lit\RedisExt\LoopCounter::everyDays("test3", 3, false, 1));
 ````
 
-#### 自定义计数器
+#### 4. 自定义计数器
 
 ````php
 //指定时间计数器 指定某时间过期
 var_dump(Lit\RedisExt\LoopCounter::nextRoundAt("test4", time() + 3600 * 7));
 ````
 
-#### 其他操作
+#### 5. 其他操作
 
 ````php
 //销毁一个计数器
@@ -114,7 +114,7 @@ var_dump(Lit\RedisExt\LoopCounter::get("test4"));
 Lit\RedisExt\CappedCollections::init($redisHandler);
 ````
 
-#### 固定集合写入数据
+#### 1. 固定集合写入数据
 
 ````php
 /**
@@ -125,7 +125,7 @@ Lit\RedisExt\CappedCollections::init($redisHandler);
 var_dump(Lit\RedisExt\CappedCollections::set("cappedKey", uniqid(), 20));
 ````
 
-#### 获取固定集合数据条数
+#### 2. 获取固定集合数据条数
 
 ````php
 /**
@@ -134,7 +134,7 @@ var_dump(Lit\RedisExt\CappedCollections::set("cappedKey", uniqid(), 20));
 var_dump(Lit\RedisExt\CappedCollections::size("cappedKey"));
 ````
 
-#### 获取固定集合数据
+#### 3. 获取固定集合数据
 
 注意: 此方法在并发量大的时候,会造成翻页获取数据不准确.
 
@@ -147,7 +147,7 @@ var_dump(Lit\RedisExt\CappedCollections::size("cappedKey"));
 var_dump(Lit\RedisExt\CappedCollections::get("cappedKey", 15, 5));
 ````
 
-#### 销毁固定集合
+#### 4. 销毁固定集合
 
 ````php
 /**
@@ -189,7 +189,7 @@ var_dump(Lit\RedisExt\CappedCollections::destroy("cappedKey"));
 Lit\RedisExt\LoopThrottle::init($redisHandler);
 ````
 
-#### 访问并增加访问次数
+#### 1. 访问并增加访问次数
 
 ````php
 /**
@@ -201,7 +201,7 @@ Lit\RedisExt\LoopThrottle::init($redisHandler);
 var_dump(Lit\RedisExt\LoopThrottle::attempt("tKey1", 2, 10));
 ````
 
-#### 查询限流
+#### 2. 查询限流
 
 ````php
 /**
@@ -212,7 +212,7 @@ var_dump(Lit\RedisExt\LoopThrottle::attempt("tKey1", 2, 10));
 var_dump(Lit\RedisExt\LoopThrottle::count("tKey1", 300));
 ````
 
-#### 销毁限流器
+#### 3. 销毁限流器
 
 ````php
 
@@ -243,7 +243,7 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
 \Lit\RedisExt\AsyncMethod::init($redisHandler, 50);
 ````
 
-#### 增加一个异步调用
+#### 1. 增加一个异步调用
 
 ````php
 /**
@@ -257,7 +257,7 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
 
 ````
 
-#### 执行一条异步调用
+#### 2. 执行一条异步调用
 
 ````php
 /**
@@ -269,7 +269,7 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
 \Lit\RedisExt\AsyncMethod::run("testKey");
 ````
 
-#### 获取一个任务的运行状态
+#### 3. 获取一个任务的运行状态
 
 ````php
 /**
@@ -286,7 +286,7 @@ var_dump(Lit\RedisExt\LoopThrottle::destroy("tKey1"));
 var_dump(\Lit\RedisExt\AsyncMethod::getStatus("t-632ad7f381214"));
 ````
 
-#### 获取任务列表
+#### 4. 获取任务列表
 
 ````php
 /**
@@ -311,7 +311,7 @@ var_dump(\Lit\RedisExt\AsyncMethod::getList("testKey",0 , 10));
 \Lit\RedisExt\XLocks::init($redisHandler);
 ````
 
-#### 获取锁
+#### 1. 获取锁
 
 ````php
 /**
@@ -323,7 +323,7 @@ var_dump(\Lit\RedisExt\AsyncMethod::getList("testKey",0 , 10));
 var_dump(\Lit\RedisExt\XLocks::lock("testa", 20, true));
 ````
 
-#### 解锁
+#### 2. 解锁
 
 ````php
 /**
@@ -333,7 +333,7 @@ var_dump(\Lit\RedisExt\XLocks::lock("testa", 20, true));
 var_dump(\Lit\RedisExt\XLocks::unLock("testa"));
 ````
 
-#### 获取锁生命周期
+#### 3. 获取锁生命周期
 
 ````php
 /**
@@ -350,49 +350,78 @@ var_dump(\Lit\RedisExt\XLocks::ttl("testa"));
 #### 初始化链接
 
 ````php
-\Lit\RedisExt\CacheString::init($redisHandler);
+\Lit\RedisExt\CacheSup::init($redisHandler);
 ````
 
-#### 获取缓存数据
+#### 1. 获取缓存数据
 
 ````php
 $version = "1.0.0";
-var_dump(\Lit\RedisExt\CacheString::get("tmpKey:0", $version));
+var_dump(\Lit\RedisExt\CacheSup::get("tmpKey:0", $version));
+//NULL 
+// 或者
+//array(2) {
+//  [0]=>
+//  string(19) "tmp:1:64586e4405fa5"
+//  [1]=>
+//  string(19) "tmp:2:64586e4406026"
+//}
+
 ````
 
-#### 写入缓存数据
+#### 2. 写入缓存数据
 
 ````php
 $version = "1.0.0";
-var_dump(\Lit\RedisExt\CacheString::set("tmpKey:0", ["tmp:1:" . uniqid(), "tmp:2:" . uniqid()], $version, 30));
+var_dump(\Lit\RedisExt\CacheSup::set("tmpKey:0", ["tmp:1:" . uniqid(), "tmp:2:" . uniqid()], $version, 30));
+//bool(true)
 ````
 
-#### 获取缓存数据,不存在时则通过回调函数初始化
+#### 3. 获取缓存数据,不存在时则通过回调函数初始化
 
 ````php
 $version = "1.0.0";
 $keyObject = new CacheStringKey("tmpKey:0:0", [1, 1]);
-$data = \Lit\RedisExt\CacheString::getOrSet($keyObject, function ($id1, $id2) {
+$data = \Lit\RedisExt\CacheSup::getOrSet($keyObject, function ($id1, $id2) {
     return $id1 . ":" . $id2 . ":" . uniqid();
 }, $version, 30);
+
 ````
 
-#### 批量获取缓存数据
+#### 4. 批量获取缓存数据
 
 ````php
 $version = "1.0.0";
-var_dump(\Lit\RedisExt\CacheString::mGet(["tmpKey:1", "tmpKey:2", "tmpKey:3"], $version));
+var_dump(\Lit\RedisExt\CacheSup::mGet(["tmpKey:1", "tmpKey:2", "tmpKey:3"], $version));
+//array(3) {
+//  ["tmpKey:1"]=>
+//  NULL
+//  ["tmpKey:2"]=>
+//  NULL
+//  ["tmpKey:3"]=>
+//  NULL
+//}
+//或者
+//array(3) {
+//  ["tmpKey:1"]=>
+//  string(19) "tmp:1:64586e4407117"
+//  ["tmpKey:2"]=>
+//  string(19) "tmp:2:64586e4407140"
+//  ["tmpKey:3"]=>
+//  string(19) "tmp:3:64586e4407145"
+//}
 ````
 
-#### 批量写入缓存数据
+#### 5. 批量写入缓存数据
 
 ````php
 $version = "1.0.0";
 $cacheData = ["tmpKey:1" => "tmp:1:" . uniqid(), "tmpKey:2" => "tmp:2:" . uniqid(), "tmpKey:3" => "tmp:3:" . uniqid()];
-var_dump(\Lit\RedisExt\CacheString::mSet($cacheData, $version, 30));
+var_dump(\Lit\RedisExt\CacheSup::mSet($cacheData, $version, 30));
+//bool(true)
 ````
 
-#### 批量获取缓存数据,不存在时则通过回调函数初始化
+#### 6. 批量获取缓存数据,不存在时则通过回调函数初始化
 
 ````php
 $version = "1.0.0";
@@ -401,10 +430,18 @@ $keyObjects = [
     new CacheStringKey("tmpKey:2:2", [2, 2]),
     new CacheStringKey("tmpKey:3:3", [3, 3])
 ];
-$data = \Lit\RedisExt\CacheString::mGetOrSet($keyObjects, function ($id1, $id2) {
+$data = \Lit\RedisExt\CacheSup::mGetOrSet($keyObjects, function ($id1, $id2) {
     return $id1 . ":" . $id2 . ":" . uniqid();
 }, $version, 30);
 var_dump($data);
+//array(3) {
+//  ["tmpKey:1:1"]=>
+//  string(17) "1:1:64586db82eded"
+//  ["tmpKey:2:2"]=>
+//  string(17) "2:2:64586db82ee35"
+//  ["tmpKey:3:3"]=>
+//  string(17) "3:3:64586db82ee3a"
+//}
 ````
 
 ## 信息整合器

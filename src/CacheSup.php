@@ -2,9 +2,9 @@
 
 namespace Lit\RedisExt;
 
-use Lit\RedisExt\Structs\CacheStringKey;
+use Lit\RedisExt\Structs\CacheSupGetKey;
 
-class CacheString extends RedisExt
+class CacheSup extends RedisExt
 {
     protected static $verField = "version";
     protected static $dataField = "date";
@@ -13,7 +13,7 @@ class CacheString extends RedisExt
      * 初始化redis数据库
      * @date 2023/5/6
      * @param mixed $redisHandler redis链接句柄
-     * @return CacheString
+     * @return CacheSup
      * @author litong
      */
     public static function init($redisHandler) {
@@ -69,7 +69,7 @@ class CacheString extends RedisExt
      * @param string|array $value 要存储的值
      * @param string $version 数据版本
      * @param int $timeout 数据生命期
-     * @return mixed|string|null
+     * @return bool
      * @throws \Exception
      * @author litong
      */
@@ -111,7 +111,7 @@ class CacheString extends RedisExt
     /**
      * 获取或初始化一个缓存数据
      * @date 2023/5/7
-     * @param CacheStringKey $keyObject RedisKey对象
+     * @param CacheSupGetKey $keyObject RedisKey对象
      * @param callable $callable 数据为空时, 初始化数据的方法
      * @param string $version 数据版本
      * @param int $timeout 数据生命期
@@ -131,7 +131,7 @@ class CacheString extends RedisExt
     /**
      * 批量获取或初始化缓存数据
      * @date 2023/5/8
-     * @param CacheStringKey[] $keyObjects RedisKey对象
+     * @param CacheSupGetKey[] $keyObjects RedisKey对象
      * @param $callable
      * @param string $version
      * @param int $timeout
