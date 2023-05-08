@@ -7,7 +7,7 @@ use Lit\RedisExt\Structs\CacheSupGetKey;
 class CacheSup extends RedisExt
 {
     protected static $verField = "version";
-    protected static $dataField = "date";
+    protected static $dataField = "cache";
 
     /**
      * 初始化redis数据库
