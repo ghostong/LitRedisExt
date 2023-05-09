@@ -10,6 +10,21 @@ $redisHandler->connect("utils-redis");
 
 //初始化 Redis String
 \Lit\RedisExt\CacheSup::init($redisHandler);
+
+$keyObj = new \Lit\RedisExt\Structs\CacheSupRangeKey();
+$keyObj->key = "list:a:2";
+$keyObj->cursor = 0;
+$keyObj->limit = 10;
+$tmp = \Lit\RedisExt\CacheSup::zRangeOrAdd($keyObj, function () {
+    return [["name" => "haha", "age" => 20], ["name" => "hehe", "age" => 30], ["name" => "hello", "age" => 40], ["name" => "world", "age" => 50]];
+}, function ($value) {
+    return $value["age"];
+}, 30);
+
+var_dump($tmp);
+
+//----------------------//
+exit;
 $version = "1.0.0";
 
 //获取缓存数据

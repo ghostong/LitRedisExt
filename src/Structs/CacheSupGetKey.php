@@ -7,11 +7,11 @@ namespace Lit\RedisExt\Structs;
 class CacheSupGetKey
 {
     //redis key
-    protected $key = "";
+    public $key = "";
     //空结果回调函数参数
-    protected $params = [];
+    public $params = [];
 
-    public function __construct($key, $params) {
+    public function __construct($key = "", $params = []) {
         $this->key = $key;
         $this->params = $params;
     }

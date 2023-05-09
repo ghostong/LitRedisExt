@@ -3,6 +3,7 @@
 namespace Lit\RedisExt;
 
 use Lit\RedisExt\Structs\CacheSupGetKey;
+use Lit\RedisExt\Structs\CacheSupRangeKey;
 
 class CacheSup extends RedisExt
 {
@@ -73,7 +74,7 @@ class CacheSup extends RedisExt
      * @throws \Exception
      * @author litong
      */
-    public static function set($key, $value, $version = "1.0.0", $timeout = 0) {
+    public static function set($key, $value, $version = "1.0.0", $timeout = null) {
         $data = [self::$verField => $version, self::$dataField => $value];
         return self::redisHandler()->set($key, json_encode($data, JSON_UNESCAPED_UNICODE), $timeout);
     }
@@ -88,7 +89,7 @@ class CacheSup extends RedisExt
      * @throws \Exception
      * @author litong
      */
-    public static function mSet($data, $version = "1.0.0", $timeout = 0) {
+    public static function mSet($data, $version = "1.0.0", $timeout = null) {
         $data = array_map(function ($value) use ($version) {
             return json_encode([self::$verField => $version, self::$dataField => $value], JSON_UNESCAPED_UNICODE);
         }, $data);
@@ -119,7 +120,7 @@ class CacheSup extends RedisExt
      * @throws \Exception
      * @author litong
      */
-    public static function getOrSet($keyObject, $callable, $version = "1.0.0", $timeout = 0) {
+    public static function getOrSet($keyObject, $callable, $version = "1.0.0", $timeout = null) {
         $data = self::get($keyObject->getKey(), $version);
         if (is_null($data)) {
             $data = call_user_func_array($callable, $keyObject->getParams());
@@ -138,7 +139,7 @@ class CacheSup extends RedisExt
      * @return array
      * @author litong
      */
-    public static function mGetOrSet($keyObjects, $callable, $version = "1.0.0", $timeout = 0) {
+    public static function mGetOrSet($keyObjects, $callable, $version = "1.0.0", $timeout = null) {
         $keyInfos = [];
         foreach ($keyObjects as $keyObject) {
             $keyInfos[$keyObject->getKey()] = $keyObject;
@@ -156,5 +157,46 @@ class CacheSup extends RedisExt
         return $data;
     }
 
+
+    /**
+     *
+     * @date 2023/5/9
+     * @param CacheSupRangeKey $keyObject
+     * @param $callback
+     * @param $scoreCallback
+     * @param null $timeout
+     * @return array
+     * @throws \Exception
+     * @author litong
+     */
+    public static function zRangeOrAdd($keyObject, $callback, $scoreCallback, $timeout = null) {
+        $redis = self::redisHandler();
+        $zCard = $redis->zCard($keyObject->getKey());
+        if ($zCard < 1) {
+            $data = call_user_func($callback);
+            if (!empty($data)) {
+                $pipe = $redis->pipeline();
+                $tmpKey = $keyObject->getKey() . ":_tmp_";
+                $pipe->del($tmpKey);
+                foreach ($data as $value) {
+                    $score = call_user_func($scoreCallback, $value);
+                    $pipe->zAdd($tmpKey, $score, json_encode($value));
+                }
+                $pipe->exec();
+                if ($redis->zCard($tmpKey) == count($data)) {
+                    $redis->rename($tmpKey, $keyObject->getKey());
+                }
+                if ($timeout > 0) {
+                    $redis->expire($keyObject->getKey(), $timeout);
+                }
+            }
+        }
+        $data = $redis->zRangeByScore($keyObject->getKey(), $keyObject->getCursor(), PHP_INT_MAX, ['withscores' => TRUE, 'limit' => array(0, $keyObject->getLimit())]);
+        return array_map(function ($value, $key) {
+            $tmp = json_decode($value, true);
+            $tmp["__score"] = $key;
+            return $tmp;
+        }, array_keys($data), array_values($data));
+    }
 
 }
