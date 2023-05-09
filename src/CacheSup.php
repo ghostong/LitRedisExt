@@ -159,31 +159,33 @@ class CacheSup extends RedisExt
 
 
     /**
-     *
+     * 获取或者写入一个有序集合
      * @date 2023/5/9
      * @param CacheSupRangeKey $keyObject
-     * @param $callback
-     * @param $scoreCallback
-     * @param null $timeout
+     * @param callable $callback key为空时, 数据回调函数
+     * @param callable $valueCallback 写入有序集合时, 值的过滤方式
+     * @param callable $scoreCallback 写入有序集合时, 评分的生成方式
+     * @param null $timeout key 过期时间
      * @return array
      * @throws \Exception
      * @author litong
      */
-    public static function zRangeOrAdd($keyObject, $callback, $scoreCallback, $timeout = null) {
+    public static function zRangeOrAdd($keyObject, $callback, $valueCallback, $scoreCallback, $timeout = null) {
         $redis = self::redisHandler();
         $zCard = $redis->zCard($keyObject->getKey());
         if ($zCard < 1) {
-            $data = call_user_func($callback);
-            if (!empty($data)) {
+            $selectData = call_user_func($callback);
+            if (!empty($selectData)) {
                 $pipe = $redis->pipeline();
                 $tmpKey = $keyObject->getKey() . ":_tmp_";
                 $pipe->del($tmpKey);
-                foreach ($data as $value) {
+                foreach ($selectData as $value) {
                     $score = call_user_func($scoreCallback, $value);
-                    $pipe->zAdd($tmpKey, $score, json_encode($value));
+                    $pipe->zAdd($tmpKey, $score, call_user_func($valueCallback, $value));
                 }
                 $pipe->exec();
-                if ($redis->zCard($tmpKey) == count($data)) {
+                $zCard = $redis->zCard($tmpKey);
+                if ($zCard == count($selectData)) {
                     $redis->rename($tmpKey, $keyObject->getKey());
                 }
                 if ($timeout > 0) {
@@ -191,12 +193,15 @@ class CacheSup extends RedisExt
                 }
             }
         }
-        $data = $redis->zRangeByScore($keyObject->getKey(), $keyObject->getCursor(), PHP_INT_MAX, ['withscores' => TRUE, 'limit' => array(0, $keyObject->getLimit())]);
-        return array_map(function ($value, $key) {
-            $tmp = json_decode($value, true);
-            $tmp["__score"] = $key;
-            return $tmp;
-        }, array_keys($data), array_values($data));
+        $rangeData = $redis->zRangeByScore($keyObject->getKey(), $keyObject->getCursor(), PHP_INT_MAX, ['withscores' => TRUE, 'limit' => array(0, $keyObject->getLimit())]);
+        $data = array_keys($rangeData);
+        return [
+            "data" => $data,
+            "cursor" => count($data) < $keyObject->getLimit() ? -1 : end($rangeData) + 1,
+            "endScore" => end($rangeData),
+            "total" => $zCard,
+            "limit" => $keyObject->getLimit(),
+        ];
     }
 
 }

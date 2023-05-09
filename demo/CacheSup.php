@@ -13,13 +13,15 @@ $redisHandler->connect("utils-redis");
 
 $keyObj = new \Lit\RedisExt\Structs\CacheSupRangeKey();
 $keyObj->key = "list:a:2";
-$keyObj->cursor = 0;
-$keyObj->limit = 10;
+$keyObj->cursor = 21;
+$keyObj->limit = 1;
 $tmp = \Lit\RedisExt\CacheSup::zRangeOrAdd($keyObj, function () {
     return [["name" => "haha", "age" => 20], ["name" => "hehe", "age" => 30], ["name" => "hello", "age" => 40], ["name" => "world", "age" => 50]];
 }, function ($value) {
+    return $value["name"];
+}, function ($value) {
     return $value["age"];
-}, 30);
+}, 1);
 
 var_dump($tmp);
 
