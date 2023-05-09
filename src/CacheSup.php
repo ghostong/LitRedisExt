@@ -197,8 +197,8 @@ class CacheSup extends RedisExt
         $rangeData = $redis->zRangeByScore($keyObject->getKey(), $keyObject->getCursor(), PHP_INT_MAX, ['withscores' => TRUE, 'limit' => array(0, $keyObject->getLimit())]);
         $rangeReturn = new CacheSupRangeReturn();
         $rangeReturn->data = array_keys($rangeData);
-        $rangeReturn->cursor = count($rangeData) < $keyObject->getLimit() ? -1 : end($rangeData) + 1;
-        $rangeReturn->endScore = end($rangeData);
+        $rangeReturn->cursor = intval(count($rangeData) < $keyObject->getLimit() ? -1 : end($rangeData) + 1);
+        $rangeReturn->endScore = intval(end($rangeData));
         $rangeReturn->total = $zCard;
         $rangeReturn->limit = $keyObject->getLimit();
         return $rangeReturn;
