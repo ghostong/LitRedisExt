@@ -4,6 +4,7 @@ namespace Lit\RedisExt;
 
 use Lit\RedisExt\Structs\CacheSupGetKey;
 use Lit\RedisExt\Structs\CacheSupRangeKey;
+use Lit\RedisExt\Structs\CacheSupRangeReturn;
 
 class CacheSup extends RedisExt
 {
@@ -166,7 +167,7 @@ class CacheSup extends RedisExt
      * @param callable $valueCallback 写入有序集合时, 值的过滤方式
      * @param callable $scoreCallback 写入有序集合时, 评分的生成方式
      * @param null $timeout key 过期时间
-     * @return array
+     * @return CacheSupRangeReturn
      * @throws \Exception
      * @author litong
      */
@@ -194,14 +195,13 @@ class CacheSup extends RedisExt
             }
         }
         $rangeData = $redis->zRangeByScore($keyObject->getKey(), $keyObject->getCursor(), PHP_INT_MAX, ['withscores' => TRUE, 'limit' => array(0, $keyObject->getLimit())]);
-        $data = array_keys($rangeData);
-        return [
-            "data" => $data,
-            "cursor" => count($data) < $keyObject->getLimit() ? -1 : end($rangeData) + 1,
-            "endScore" => end($rangeData),
-            "total" => $zCard,
-            "limit" => $keyObject->getLimit(),
-        ];
+        $rangeReturn = new CacheSupRangeReturn();
+        $rangeReturn->data = array_keys($rangeData);
+        $rangeReturn->cursor = count($rangeData) < $keyObject->getLimit() ? -1 : end($rangeData) + 1;
+        $rangeReturn->endScore = end($rangeData);
+        $rangeReturn->total = $zCard;
+        $rangeReturn->limit = $keyObject->getLimit();
+        return $rangeReturn;
     }
 
 }
