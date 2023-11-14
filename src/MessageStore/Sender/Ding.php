@@ -17,7 +17,6 @@ class Ding
         $result = curl_exec($ch);
         curl_close($ch);
         $data = json_decode($result, true);
-        var_dump($result);
         if (is_array($data) && isset($data['errcode']) && isset($data['errcode']) == 0) {
             return true;
         } else {
