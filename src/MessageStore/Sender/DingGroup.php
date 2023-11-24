@@ -35,7 +35,7 @@ class DingGroup extends Ding
         $data["text"]["content"] = trim($content, "\n");
         /** @var SenderDingMapper $senderDingMapper */
         $senderDingMapper = $senders[count($senders) - 1];
-        self::request($data, $senderDingMapper->accessToken, $senderDingMapper->token);
+        return self::request($data, $senderDingMapper->accessToken, $senderDingMapper->token);
     }
 
     public static function markdown($messages, $senders) {
@@ -95,7 +95,7 @@ class DingGroup extends Ding
         $data["markdown"]["title"] = $title;
         /** @var SenderDingMapper $senderDingMapper */
         $senderDingMapper = $senders[count($senders) - 1];
-        self::request($data, $senderDingMapper->accessToken, $senderDingMapper->token);
+        return self::request($data, $senderDingMapper->accessToken, $senderDingMapper->token);
     }
 
 }

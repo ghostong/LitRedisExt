@@ -2,7 +2,9 @@
 
 namespace Lit\RedisExt\MessageStore\Sender;
 
-class Ding
+use Lit\RedisExt\MessageStore\ErrorMsg;
+
+class Ding extends ErrorMsg
 {
     protected static function request($postData, $accessToken, $token = null) {
         $url = "https://oapi.dingtalk.com/robot/send?access_token=" . $accessToken;
@@ -20,6 +22,7 @@ class Ding
         if (is_array($data) && isset($data['errcode']) && isset($data['errcode']) == 0) {
             return true;
         } else {
+            self::setError($data['errcode'], $data['errmsg']);
             return false;
         }
     }

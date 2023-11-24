@@ -132,6 +132,9 @@ class Message extends ErrorMsg
     protected function messageFormat(MessageMapper $message) {
         $message->uniqId = is_null($message->uniqId) ? uniqid() : $message->uniqId;
         $message->topic = is_null($message->topic) ? "public" : $message->topic;
+        if (stripos($message->topic, '_') !== false) {
+            throw new \Exception("topic " . $message->topic . " 错误, 不能包含下划线");
+        }
         $message->duplicateSecond = (is_numeric($message->duplicateSecond) && $message->duplicateSecond > 0) ? intval($message->duplicateSecond) : null;
         return $message;
     }
@@ -172,7 +175,7 @@ class Message extends ErrorMsg
         if ($this->redisHandler->hSet($redisKey, $this->getMessageId($message), $data) !== false) {
             return true;
         } else {
-            $this->setError(10101, __CLASS__ . " error");
+            self::setError(10101, __CLASS__ . " error");
             return false;
         }
     }
@@ -258,7 +261,7 @@ class Message extends ErrorMsg
                 $this->redisHandler->expire($key, $message->duplicateSecond);
                 return true;
             } else {
-                $this->setError(10102, __CLASS__ . " error ");
+                self::setError(10102, __CLASS__ . " error ");
                 return false;
             }
         }

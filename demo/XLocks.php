@@ -11,7 +11,7 @@ $redisHandler->connect("192.168.1.163");
 \Lit\RedisExt\XLocks::init($redisHandler);
 
 //获取锁
-var_dump(\Lit\RedisExt\XLocks::lock("testa", 20));
+var_dump(\Lit\RedisExt\XLocks::lock("testa", 20, true));
 
 //获取锁剩余生命周期
 var_dump(\Lit\RedisExt\XLocks::ttl("testa"));

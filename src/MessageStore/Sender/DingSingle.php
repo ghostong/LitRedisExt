@@ -20,7 +20,7 @@ class DingSingle extends Ding
         if (property_exists($sender, "isAtAll")) {
             $data["at"]["isAtAll"] = $sender->isAtAll;
         }
-        self::request($data, $sender->accessToken, $sender->token);
+        return self::request($data, $sender->accessToken, $sender->token);
     }
 
     public static function markdown(MessageSingleMapper $message, SenderDingMapper $sender) {
@@ -36,7 +36,7 @@ class DingSingle extends Ding
         if (property_exists($sender, "isAtAll")) {
             $data["at"]["isAtAll"] = $sender->isAtAll;
         }
-        self::request($data, $sender->accessToken, $sender->token);
+        return self::request($data, $sender->accessToken, $sender->token);
     }
 
     public static function link(MessageSingleMapper $message, SenderDingMapper $sender) {
@@ -49,7 +49,7 @@ class DingSingle extends Ding
         if (property_exists($sender, "messageUrl")) {
             $data["link"]["messageUrl"] = $sender->messageUrl;
         }
-        self::request($data, $sender->accessToken, $sender->token);
+        return self::request($data, $sender->accessToken, $sender->token);
     }
 
     public static function feedCard(MessageSingleMapper $message, SenderDingMapper $sender) {
@@ -61,7 +61,7 @@ class DingSingle extends Ding
         if (property_exists($sender, "links")) {
             $data["feedCard"]["links"] = $sender->links;
         }
-        self::request($data, $sender->accessToken, $sender->token);
+        return self::request($data, $sender->accessToken, $sender->token);
     }
 
     public static function actionCard(MessageSingleMapper $message, SenderDingMapper $sender) {
@@ -75,7 +75,7 @@ class DingSingle extends Ding
         if (property_exists($sender, "btns")) {
             $data["actionCard"]["btns"] = $sender->btns;
         }
-        self::request($data, $sender->accessToken, $sender->token);
+        return self::request($data, $sender->accessToken, $sender->token);
     }
 
 }

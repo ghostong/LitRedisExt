@@ -4,8 +4,8 @@ namespace Lit\RedisExt\MessageStore;
 
 class ErrorMsg
 {
-    protected $errorCode = 0;
-    protected $errorMessage = "";
+    protected static $errorCode = 0;
+    protected static $errorMessage = "";
 
 
     /**
@@ -16,9 +16,9 @@ class ErrorMsg
      * @return void
      * @author litong
      */
-    protected function setError($errorCode, $errorMessage) {
-        $this->errorCode = $errorCode;
-        $this->errorMessage = $errorMessage;
+    protected static function setError($errorCode, $errorMessage) {
+        self::$errorCode = $errorCode;
+        self::$errorMessage = $errorMessage;
     }
 
     /**
@@ -27,8 +27,8 @@ class ErrorMsg
      * @return int
      * @author litong
      */
-    public function getErrorCode() {
-        return $this->errorCode;
+    public static function getErrorCode() {
+        return self::$errorCode;
     }
 
     /**
@@ -37,8 +37,8 @@ class ErrorMsg
      * @return string
      * @author litong
      */
-    public function getErrorMessage() {
-        return $this->errorMessage;
+    public static function getErrorMessage() {
+        return self::$errorMessage;
     }
 
 }

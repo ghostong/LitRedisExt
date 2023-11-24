@@ -70,13 +70,19 @@ class MessageStore extends RedisExt
      * @throws \Exception
      * @author litong
      */
-    public static function autoRun() {
+    public static function autoRun($showError = false) {
         (new MessageSend(self::redisHandler()))->run(
-            function (MessageMapper $message, SenderMapper $sender = null) {
+            function (MessageMapper $message, SenderMapper $sender = null) use ($showError) {
                 Sender::SendSingle($message, $sender);
+                if ($showError) {
+                    echo Sender::getErrorCode(), ' ', Sender::getErrorMessage(), "\n";
+                }
             },
-            function (array $message, array $sender = null) {
+            function (array $message, array $sender = null) use ($showError) {
                 Sender::DingSendGroup($message, $sender);
+                if ($showError) {
+                    echo Sender::getErrorCode(), ' ', Sender::getErrorMessage(), "\n";
+                }
             }
         );
     }
