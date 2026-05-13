@@ -449,3 +449,87 @@ var_dump($data);
 ````
 见 示例
 ````
+
+## SQL结果缓存
+
+### 场景说明
+
+```
+将数据库查询结果缓存到Redis Set中，支持三种读取模式：
+1. inOrder - 顺序分页读取
+2. inRandom - 随机读取（数据保留）
+3. inRandomPopUp - 随机弹出（数据删除）
+
+适用于：
+    1. 数据库查询结果缓存
+    2. 随机推荐、抽奖等场景
+    3. 库存扣减、任务队列等
+```
+
+### 示例
+
+#### 初始化
+
+````php
+//初始化 SqlCache
+\Lit\RedisExt\SqlCache::init($redisHandler);
+````
+
+#### 1. 顺序分页读取 (inOrder)
+
+````php
+/**
+ * 参数1: 缓存key
+ * 参数2: 数据查询回调（返回完整数据数组）
+ * 参数3: 跳过数量
+ * 参数4: 查询数量
+ * 参数5: 缓存过期时间(秒)
+ */
+$result = \Lit\RedisExt\SqlCache::inOrder("users:list", function () {
+    // 实际项目中替换为真实SQL查询
+    $pdo = new PDO('mysql:host=localhost;dbname=test', 'user', 'pass');
+    return $pdo->query("SELECT * FROM users")->fetchAll(PDO::FETCH_ASSOC);
+}, 0, 10, 3600);
+
+// 获取结果
+$data = $result->getData();   // 分页数据
+$total = $result->getTotal(); // 总数
+````
+
+#### 2. 随机读取 (inRandom)
+
+适用于随机推荐、抽奖等活动，数据保留在缓存中。
+
+````php
+/**
+ * 参数1: 缓存key
+ * 参数2: 数据查询回调
+ * 参数3: 查询数量
+ * 参数4: 缓存过期时间(秒)
+ */
+$result = \Lit\RedisExt\SqlCache::inRandom("prize:pool", $getPrizeCallback, 5, 3600);
+var_dump($result->getData());
+````
+
+#### 3. 随机弹出 (inRandomPopUp)
+
+适用于库存扣减、任务分发等场景，从缓存中删除数据。缓存为空时自动重新加载。
+
+````php
+/**
+ * 参数1: 缓存key
+ * 参数2: 数据查询回调
+ * 参数3: 弹出数量
+ * 参数4: 缓存过期时间(秒)
+ */
+$result = \Lit\RedisExt\SqlCache::inRandomPopUp("task:queue", $getTaskCallback, 3, 3600);
+var_dump($result->getData());
+// 每次调用会从缓存中移除这些数据
+// 当缓存为空时会自动重新执行回调加载数据
+````
+
+#### 4. 清除缓存
+
+````php
+\Lit\RedisExt\SqlCache::clear("users:list");
+````

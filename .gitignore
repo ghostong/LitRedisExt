@@ -1,3 +1,5 @@
 composer.lock
 vendor/
 .idea
+.trae
+CODE_WIKI.md
