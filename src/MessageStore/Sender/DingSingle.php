@@ -8,7 +8,8 @@ use Lit\RedisExt\MessageStore\Mapper\SenderDingTextMapper;
 
 class DingSingle extends Ding
 {
-    public static function text(MessageSingleMapper $message, SenderDingMapper $sender) {
+    public static function text(MessageSingleMapper $message, SenderDingMapper $sender)
+    {
         $data["msgtype"] = __FUNCTION__;
         $data["text"]["content"] = $message->body;
         if (property_exists($sender, "atMobiles")) {
@@ -23,7 +24,8 @@ class DingSingle extends Ding
         return self::request($data, $sender->accessToken, $sender->token);
     }
 
-    public static function markdown(MessageSingleMapper $message, SenderDingMapper $sender) {
+    public static function markdown(MessageSingleMapper $message, SenderDingMapper $sender)
+    {
         $data["msgtype"] = __FUNCTION__;
         $data["markdown"]["title"] = $message->title;
         $data["markdown"]["text"] = $message->body;
@@ -36,10 +38,14 @@ class DingSingle extends Ding
         if (property_exists($sender, "isAtAll")) {
             $data["at"]["isAtAll"] = $sender->isAtAll;
         }
+        if ($data["at"]["isAtAll"]) {
+            $data["markdown"]["text"] .= "\n\n@all";
+        }
         return self::request($data, $sender->accessToken, $sender->token);
     }
 
-    public static function link(MessageSingleMapper $message, SenderDingMapper $sender) {
+    public static function link(MessageSingleMapper $message, SenderDingMapper $sender)
+    {
         $data["msgtype"] = __FUNCTION__;
         $data["link"]["text"] = $message->body;
         $data["link"]["title"] = $message->title;
@@ -52,7 +58,8 @@ class DingSingle extends Ding
         return self::request($data, $sender->accessToken, $sender->token);
     }
 
-    public static function feedCard(MessageSingleMapper $message, SenderDingMapper $sender) {
+    public static function feedCard(MessageSingleMapper $message, SenderDingMapper $sender)
+    {
         $data["msgtype"] = "text";
         $data["text"]["content"] = $message->body;
         self::request($data, $sender->accessToken, $sender->token);
@@ -64,7 +71,8 @@ class DingSingle extends Ding
         return self::request($data, $sender->accessToken, $sender->token);
     }
 
-    public static function actionCard(MessageSingleMapper $message, SenderDingMapper $sender) {
+    public static function actionCard(MessageSingleMapper $message, SenderDingMapper $sender)
+    {
         $data["msgtype"] = __FUNCTION__;
         $data["actionCard"]["title"] = $message->title;
         $data["actionCard"]["text"] = $message->body;

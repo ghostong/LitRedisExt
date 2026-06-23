@@ -10,7 +10,8 @@ class DingGroup extends Ding
 
     const MARKDOWN_MAX_LENGTH = 5000;
 
-    public static function text(array $messages, array $senders) {
+    public static function text(array $messages, array $senders)
+    {
         $data["msgtype"] = __FUNCTION__;
         $content = "";
         $atMobiles = $atUserIds = $isAtAll = [];
@@ -38,7 +39,8 @@ class DingGroup extends Ding
         return self::request($data, $senderDingMapper->accessToken, $senderDingMapper->token);
     }
 
-    public static function markdown($messages, $senders) {
+    public static function markdown($messages, $senders)
+    {
         $data["msgtype"] = __FUNCTION__;
         $title = $content = "";
         $atMobiles = $atUserIds = $isAtAll = [];
@@ -57,7 +59,8 @@ class DingGroup extends Ding
             }
             $title = $messageGroupMapper->title;
             $contentMobiles = (!empty($atMobiles)) ? (' @' . implode(' ,@', $atMobiles)) : '';
-            $tmpContent = $messageGroupMapper->title . "\n" . $messageGroupMapper->body . "\n" . $contentMobiles . "\n\n";
+            $contentAtAll = (!empty($isAtAll)) ? (' @所有人') : '';
+            $tmpContent = $messageGroupMapper->title . "\n" . $messageGroupMapper->body . "\n" . $contentMobiles . $contentAtAll . "\n\n";
             if (strlen($content) > 0 && strlen($content) + strlen($tmpContent) > self::MARKDOWN_MAX_LENGTH) {
                 self::send($data, $senders, $atMobiles, $atUserIds, $isAtAll, $content, $title);
                 $atMobiles = $atUserIds = $isAtAll = [];
@@ -72,22 +75,26 @@ class DingGroup extends Ding
 
     }
 
-    public static function link($messages, $senders) {
+    public static function link($messages, $senders)
+    {
         $data["msgtype"] = __FUNCTION__;
 
     }
 
-    public static function feedCard($message, $sender) {
+    public static function feedCard($message, $sender)
+    {
         $data["msgtype"] = __FUNCTION__;
 
     }
 
-    public static function actionCard($message, $sender) {
+    public static function actionCard($message, $sender)
+    {
         $data["msgtype"] = __FUNCTION__;
 
     }
 
-    protected static function send($data, $senders, $atMobiles, $atUserIds, $isAtAll, $content, $title) {
+    protected static function send($data, $senders, $atMobiles, $atUserIds, $isAtAll, $content, $title)
+    {
         $data["at"]["atMobiles"] = $atMobiles;
         $data["at"]["atUserIds"] = $atUserIds;
         $data["at"]["isAtAll"] = array_sum($isAtAll) > 0;
