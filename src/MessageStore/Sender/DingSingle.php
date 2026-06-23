@@ -38,6 +38,9 @@ class DingSingle extends Ding
         if (property_exists($sender, "isAtAll")) {
             $data["at"]["isAtAll"] = $sender->isAtAll;
         }
+        if ($data["at"]["atMobiles"]) {
+            $data["markdown"]["text"] .= "\n\n" . (' @' . implode(' ,@', $data["at"]["atMobiles"]));
+        }
         if ($data["at"]["isAtAll"]) {
             $data["markdown"]["text"] .= "\n\n@all";
         }
