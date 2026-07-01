@@ -143,6 +143,9 @@ class AsyncMethod extends RedisExt
         } catch (\Exception $exception) {
             self::setStatus($uniqId, self::STATUS_ERROR);
             throw $exception;
+        } catch (\Throwable $throwable) {
+            self::setStatus($uniqId, self::STATUS_ERROR);
+            throw $throwable;
         }
     }
 

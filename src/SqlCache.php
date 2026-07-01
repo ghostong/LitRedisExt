@@ -124,10 +124,10 @@ class SqlCache extends RedisExt
     {
         $redis = self::redisHandler();
         $exists = $redis->exists($cacheKey);
-        $total = $redis->scard($cacheKey);
-        if (!$exists || $total <= 0) {
+        if (!$exists || $redis->scard($cacheKey) <= 0) {
             self::loadData($cacheKey, $callback, $ttl);
         }
+        $total = $redis->scard($cacheKey);
         $data = $redis->spop($cacheKey, $limit);
         if ($data === null || $data === false) {
             $data = [];
