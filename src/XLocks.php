@@ -7,6 +7,8 @@ namespace Lit\RedisExt;
  */
 class XLocks extends RedisExt
 {
+    protected static $lockTokens = [];
+
     /**
      * 初始化消息数据库
      * @date 2022/9/9
@@ -30,19 +32,26 @@ class XLocks extends RedisExt
      * @author litong
      */
     public static function lock($key, $ttl = 0, $autoUnlock = false) {
-        if (self::redisHandler()->setNx($key, 1)) {
-            if ($ttl > 0) {
-                self::redisHandler()->expire($key, $ttl);
-            }
-            if ($autoUnlock) {
-                register_shutdown_function(function ($k) {
-                    self::redisHandler()->del($k);
-                }, $key);
-            }
-            return true;
+        $redis = self::redisHandler();
+        $token = uniqid(getmypid() . '-', true) . '-' . mt_rand();
+        if ($ttl > 0) {
+            $locked = $redis->set($key, $token, ['nx', 'ex' => intval($ttl)]);
         } else {
+            $locked = $redis->setNx($key, $token);
+        }
+        if (!$locked) {
             return false;
         }
+        self::$lockTokens[$key] = $token;
+        if ($autoUnlock) {
+            register_shutdown_function(function ($redisHandler, $k, $lockToken) {
+                self::releaseLock($redisHandler, $k, $lockToken);
+                if (isset(self::$lockTokens[$k]) && self::$lockTokens[$k] === $lockToken) {
+                    unset(self::$lockTokens[$k]);
+                }
+            }, $redis, $key, $token);
+        }
+        return true;
     }
 
     /**
@@ -54,7 +63,21 @@ class XLocks extends RedisExt
      * @author litong
      */
     public static function unLock($key) {
-        return self::redisHandler()->del($key) > 0;
+        if (!isset(self::$lockTokens[$key])) {
+            return false;
+        }
+        $token = self::$lockTokens[$key];
+        $result = self::releaseLock(self::redisHandler(), $key, $token);
+        if (isset(self::$lockTokens[$key]) && self::$lockTokens[$key] === $token) {
+            unset(self::$lockTokens[$key]);
+        }
+        return $result;
+    }
+
+    protected static function releaseLock($redis, $key, $token) {
+        $lua = 'if redis.call("GET", KEYS[1]) == ARGV[1] then ' .
+            'return redis.call("DEL", KEYS[1]) else return 0 end';
+        return $redis->eval($lua, [$key, $token], 1) > 0;
     }
 
     /**
