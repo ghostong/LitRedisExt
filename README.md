@@ -444,12 +444,6 @@ var_dump($data);
 //}
 ````
 
-## 信息整合器
-
-````
-见 模块目录中的README.md
-````
-
 ## SQL结果缓存
 
 ### 场景说明
@@ -532,4 +526,64 @@ var_dump($result->getData());
 
 ````php
 \Lit\RedisExt\SqlCache::clear("users:list");
+````
+
+## 防击穿刷新缓存
+
+### 场景说明
+
+`RefreshCache` 使用 Redis String 保存 JSON 数据，通过软过期和默认值占位降低热点缓存失效时的数据库压力。
+
+假设 `$ttl` 为 300 秒：
+
+1. 数据在 300 秒内视为新鲜缓存。
+2. Redis key 的实际过期时间为 3000 秒，即 `$ttl * 10`。
+3. key 不存在时，首个请求先写入默认值并查询数据库；其他并发请求立即返回默认值，不等待、不查询数据库。
+4. 数据超过 300 秒后，只允许一个请求刷新数据库；其他并发请求继续返回旧缓存。
+5. 数据库查询或缓存写入失败时，返回默认值或旧缓存。
+
+> 此功能使用 Redis String，缓存 key 不要与 `SqlCache` 等使用其他 Redis 数据类型的功能混用。默认值和回调结果必须可以被 JSON 编码。
+
+### 示例
+
+#### 初始化
+
+````php
+\Lit\RedisExt\RefreshCache::init($redisHandler);
+````
+
+#### 获取缓存
+
+````php
+/**
+ * 参数1: 缓存key
+ * 参数2: 数据查询回调
+ * 参数3: 缓存未初始化时的默认值
+ * 参数4: 软过期时间，单位秒，默认300秒
+ */
+$users = \Lit\RedisExt\RefreshCache::get(
+    "refresh:users",
+    function () {
+        // 实际项目中替换为真实SQL查询
+        $pdo = new PDO('mysql:host=localhost;dbname=test', 'user', 'pass');
+        return $pdo->query("SELECT * FROM users")->fetchAll(PDO::FETCH_ASSOC);
+    },
+    [],
+    300
+);
+
+var_dump($users);
+````
+
+#### 清除缓存
+
+````php
+\Lit\RedisExt\RefreshCache::clear("refresh:users");
+````
+
+
+## 信息整合器
+
+````
+见 模块目录中的README.md
 ````
